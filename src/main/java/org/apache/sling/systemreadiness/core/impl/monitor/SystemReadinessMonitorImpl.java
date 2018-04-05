@@ -18,78 +18,35 @@
  */
 package org.apache.sling.systemreadiness.core.impl.monitor;
 
-import java.util.*;
+import java.util.List;
 
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
-import org.apache.sling.systemreadiness.core.monitor.SystemReadinessMonitor;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * TODO
- */
-
 @Component(
-        name = "System Readiness Check Monitor",
-        service = {SystemReadinessMonitor.class},
-        configurationPid = "org.apache.sling.systemreadiness.core.impl.monitor.SystemReadinessMonitorImpl",
-        immediate = true
+        name = "SystemReadinessMonitor"
 )
 public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
 
-
-
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private BundleContext bundleContext;
-    private ServiceTracker startupCheckTracker;
-
-
+    
+    @Reference(policyOption = ReferencePolicyOption.GREEDY)
+    private List<SystemReadinessCheck> checks;
 
     @Activate
-    protected void activate(final BundleContext ctx, final Map<String, Object> properties) throws InterruptedException {
-        this.bundleContext = ctx;
-
-        this.startupCheckTracker = new ServiceTracker(bundleContext, SystemReadinessCheck.class, null);
-        this.startupCheckTracker.open();
-        log.info("Activated System Readiness Monitor");
+    protected void activate() {
+        log.info("Activated");
     }
 
-    @Deactivate
-    protected void deactivate() throws InterruptedException {
-        this.startupCheckTracker.close();
-        this.startupCheckTracker = null;
-        bundleContext = null;
-    }
-
-
-    /**
-     * TODO
-     */
     @Override
     public boolean isReady() {
-
-        // Get reference to all {{StartupCheck}} services
-        final ServiceReference<SystemReadinessCheck>[] startupChecks = this.startupCheckTracker.getServiceReferences();
-        if (null == startupChecks) {
-            return true;
-        }
-
-        boolean allStarted = true;
-        for (ServiceReference<SystemReadinessCheck> ref : startupChecks) {
-            SystemReadinessCheck sc = this.bundleContext.getService(ref);
-            if (!sc.isReady()) {
-                log.info("Found check that reported NOT READY: {} [{}]", sc.isReady(), sc);
-                allStarted = false;
-                break;
-            }
-        }
-        return allStarted;
+        return checks.stream().allMatch(check -> check.isReady());
     }
 
 }

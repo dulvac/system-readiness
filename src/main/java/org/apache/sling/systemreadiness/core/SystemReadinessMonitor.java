@@ -18,24 +18,17 @@
  */
 package org.apache.sling.systemreadiness.core;
 
-import org.osgi.annotation.versioning.ConsumerType;
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
- * A {{SystemReadinessCheck}} that considers the system ready when a set of services are registered
- *
+ * Checks that all registered checks report ready
+ * TODO
  */
-@ProviderType
-public interface ServicesRegisteredCheck extends SystemReadinessCheck {
+public interface SystemReadinessMonitor {
+
 
     /**
      *
-     * @return true if the startup check
+     * @return
      */
     boolean isReady();
 
-    /**
-     *
-     */
-    String getStatus();
 }

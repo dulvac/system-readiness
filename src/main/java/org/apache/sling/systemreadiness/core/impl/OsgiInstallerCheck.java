@@ -18,28 +18,21 @@
  */
 package org.apache.sling.systemreadiness.core.impl;
 
-import org.apache.sling.systemreadiness.core.OsgiInstallerCheck;
+import java.util.Map;
+
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
-/**
- *
- */
-
 @Component(
-        name = "OSGI Installation System Readiness Check",
-        service = {OsgiInstallerCheck.class, SystemReadinessCheck.class},
-        configurationPid = "org.apache.sling.systemreadiness.core.impl.OsgiInstallerCheckImpl",
-        immediate = true
+        name = "OsgiInstallerCheck"
 )
-public class OsgiInstallerCheckImpl implements OsgiInstallerCheck, FrameworkListener {
+public class OsgiInstallerCheck implements SystemReadinessCheck {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     private BundleContext bundleContext;
@@ -48,11 +41,10 @@ public class OsgiInstallerCheckImpl implements OsgiInstallerCheck, FrameworkList
     private String status = "Starting";
     private boolean ready = false;
 
-
     @Activate
     protected void activate(final BundleContext ctx, final Map<String, Object> properties) throws InterruptedException {
         this.bundleContext = ctx;
-        this.bundleContext.addFrameworkListener(this);
+        this.bundleContext.addFrameworkListener(this::frameworkEvent);
 
         log.info("Activated");
     }
@@ -75,7 +67,6 @@ public class OsgiInstallerCheckImpl implements OsgiInstallerCheck, FrameworkList
         return status;
     }
 
-    @Override
     public void frameworkEvent(FrameworkEvent event) {
         if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
             this.count ++;

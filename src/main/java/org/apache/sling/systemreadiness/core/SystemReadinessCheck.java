@@ -18,9 +18,6 @@
  */
 package org.apache.sling.systemreadiness.core;
 
-import org.osgi.annotation.versioning.ConsumerType;
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * Readiness check services provide custom logic for signalling
  * that particular criteria are met for when an instance is considered "ready".
@@ -30,7 +27,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * {@see SystemReadinessMonitor}
  *
  */
-@ConsumerType
 public interface SystemReadinessCheck {
 
     /**
