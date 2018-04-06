@@ -86,8 +86,9 @@ public class SystemReadinessServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // TODO: better response
-        if (!this.monitor.getStatus().getState().isReady()) {
+        if (!this.monitor.isReady()) {
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, INSTANCE_NOT_READY);
+            // TODO: statuses
             return;
         } else {
             response.getWriter().print(INSTANCE_READY); // all servicechecks reported that they started.

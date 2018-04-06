@@ -18,10 +18,14 @@
  */
 package org.apache.sling.systemreadiness.core;
 
+import java.util.Map;
+
 /**
  * Checks that all registered checks report ready
  * TODO
  */
-public interface SystemReadinessMonitor extends SystemReadinessCheck {
+public interface SystemReadinessMonitor  {
+    boolean isReady();
+    Map<String, CheckStatus> getStatuses();
 
 }

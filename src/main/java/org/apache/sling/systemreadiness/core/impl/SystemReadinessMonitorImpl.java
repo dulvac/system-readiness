@@ -19,6 +19,7 @@
 package org.apache.sling.systemreadiness.core.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -99,13 +100,19 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
         }
     }
 
-    @Override
-    public CheckStatus getStatus() {
-        return new CheckStatus(state.get(), getDetails());
-    }
-
     private String getDetails() {
         // TODO
         return "";
+    }
+
+    @Override
+    public boolean isReady() {
+        return state.get().isReady();
+    }
+
+    @Override
+    public Map<String, CheckStatus> getStatuses() {
+        return null;
+        // TODO
     }
 }
