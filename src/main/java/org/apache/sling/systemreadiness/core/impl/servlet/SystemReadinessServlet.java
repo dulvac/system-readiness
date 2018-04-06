@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.systemreadiness.core.impl.monitor;
+package org.apache.sling.systemreadiness.core.impl.servlet;
 
 import java.io.IOException;
 import java.util.Map;

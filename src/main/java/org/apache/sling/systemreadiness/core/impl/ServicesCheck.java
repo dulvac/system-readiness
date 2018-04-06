@@ -28,13 +28,15 @@ import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @Component(
-        name = "ServicesCheck"
+        name = "ServicesCheck",
+        configurationPolicy = ConfigurationPolicy.REQUIRE
 )
 @Designate(ocd=ServicesCheck.Config.class)
 public class ServicesCheck implements SystemReadinessCheck {

@@ -16,14 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.systemreadiness.core.impl.monitor;
+package org.apache.sling.systemreadiness.core.impl;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
+import org.apache.sling.systemreadiness.core.SystemReady;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
@@ -39,14 +48,45 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     @Reference(policyOption = ReferencePolicyOption.GREEDY)
     private List<SystemReadinessCheck> checks;
 
+    private AtomicBoolean ready;
+
+    private BundleContext context;
+
+    private ServiceRegistration<SystemReady> sreg;
+
+    private ScheduledExecutorService executor;
+
     @Activate
-    protected void activate() {
+    public void activate(BundleContext context) {
+        this.context = context;
+        this.ready = new AtomicBoolean();
         log.info("Activated");
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(this::check, 0, 5, TimeUnit.SECONDS);
+    }
+    
+    @Deactivate
+    public void deactivate() {
+        executor.shutdown();
+    }
+    
+    private void check() {
+        boolean allReady = checks.stream().allMatch(check -> check.isReady());
+        boolean prevAllReady = this.ready.getAndSet(allReady);
+        if (prevAllReady == allReady) {
+            return;
+        }
+        if (allReady) {
+            SystemReady readyService = new SystemReady() {};
+            sreg = context.registerService(SystemReady.class, readyService, null);
+        } else {
+            sreg.unregister();
+        }
     }
 
     @Override
     public boolean isReady() {
-        return checks.stream().allMatch(check -> check.isReady());
+        return this.ready.get();
     }
 
 }
