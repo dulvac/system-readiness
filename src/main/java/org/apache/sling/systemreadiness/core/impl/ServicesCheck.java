@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -47,7 +48,7 @@ public class ServicesCheck implements SystemReadinessCheck {
     )
     public @interface Config {
 
-        @AttributeDefinition(name = "Services list", description = "The services that need to be registered")
+        @AttributeDefinition(name = "Services list", description = "The services that need to be registered for the check to pass")
         String[] services_list() default {};
 
     }
@@ -69,13 +70,15 @@ public class ServicesCheck implements SystemReadinessCheck {
         trackers.clear();
     }
 
-    @Override
-    public boolean isReady() {
-        return trackers.values().stream().allMatch(tracker -> tracker.present());
-    }
 
     @Override
-    public String getStatus() {
+    public CheckStatus getStatus() {
+        // TODO: RED on timeouts
+        final CheckStatus.State state = CheckStatus.State.fromBoolean(trackers.values().stream().allMatch(tracker -> tracker.present()));
+        return new CheckStatus(state, getDetails()); // TODO: out of sync? do we care?
+    }
+
+    private String getDetails() {
         List<String> missing = trackers.entrySet().stream()
                 .filter(entry -> !entry.getValue().present())
                 .map(entry -> entry.getKey())

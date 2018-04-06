@@ -1,5 +1,7 @@
 package org.apache.sling.systemreadiness.core.impl;
 
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -41,12 +43,12 @@ public class ServicesRegisteredTest {
 
         ServicesCheck check = new ServicesCheck();
         check.activate(ctx, config);
-        assertThat(check.isReady(), equalTo(false));
-        assertThat(check.getStatus(), equalTo("Missing services : MyService"));
+        assertThat(check.getStatus().getState(), equalTo(YELLOW));
+        assertThat(check.getStatus().getDetails(), equalTo("Missing services : MyService"));
 
         registerService("MyService");
-        assertThat(check.isReady(), equalTo(true));
-        assertThat(check.getStatus(), equalTo(""));
+        assertThat(check.getStatus().getState(), equalTo(GREEN));
+        assertThat(check.getStatus().getDetails(), equalTo(""));
         
         check.deactivate();
     }

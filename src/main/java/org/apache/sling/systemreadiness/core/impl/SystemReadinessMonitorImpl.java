@@ -19,12 +19,13 @@
 package org.apache.sling.systemreadiness.core.impl;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.apache.sling.systemreadiness.core.SystemReady;
@@ -38,6 +39,9 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.RED;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
+
 @Component(
         name = "SystemReadinessMonitor"
 )
@@ -48,7 +52,7 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     @Reference(policyOption = ReferencePolicyOption.GREEDY)
     private List<SystemReadinessCheck> checks;
 
-    private AtomicBoolean ready;
+    private AtomicReference<CheckStatus.State> state; // TODO: Why atomic?
 
     private BundleContext context;
 
@@ -59,10 +63,10 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     @Activate
     public void activate(BundleContext context) {
         this.context = context;
-        this.ready = new AtomicBoolean();
-        log.info("Activated");
+        this.state = new AtomicReference<>(YELLOW);
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(this::check, 0, 5, TimeUnit.SECONDS);
+        log.info("Activated");
     }
     
     @Deactivate
@@ -71,13 +75,24 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     }
     
     private void check() {
-        boolean allReady = checks.stream().allMatch(check -> check.isReady());
-        boolean prevAllReady = this.ready.getAndSet(allReady);
-        if (prevAllReady == allReady) {
+
+        CheckStatus.State currState = CheckStatus.State.fromBoolean(
+                checks.stream().allMatch(c -> c.getStatus().getState().isReady()));
+        if (checks.stream().anyMatch(c -> c.getStatus().getState() == RED)) {
+            currState = RED;
+        }
+        CheckStatus.State prevState = this.state.getAndSet(currState);
+
+        if (currState == prevState) {
             return;
         }
-        if (allReady) {
-            SystemReady readyService = new SystemReady() {};
+
+        if (currState == RED) {
+            // TODO: do we allow it to change state from red? For now, yes.
+        }
+
+        if (currState.isReady()) {
+            SystemReady readyService = new SystemReady() {}; // TODO: still not convinced I like this
             sreg = context.registerService(SystemReady.class, readyService, null);
         } else {
             sreg.unregister();
@@ -85,8 +100,12 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     }
 
     @Override
-    public boolean isReady() {
-        return this.ready.get();
+    public CheckStatus getStatus() {
+        return new CheckStatus(state.get(), getDetails());
     }
 
+    private String getDetails() {
+        // TODO
+        return "";
+    }
 }

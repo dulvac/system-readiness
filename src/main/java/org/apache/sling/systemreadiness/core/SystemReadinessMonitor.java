@@ -22,13 +22,6 @@ package org.apache.sling.systemreadiness.core;
  * Checks that all registered checks report ready
  * TODO
  */
-public interface SystemReadinessMonitor {
-
-
-    /**
-     *
-     * @return
-     */
-    boolean isReady();
+public interface SystemReadinessMonitor extends SystemReadinessCheck {
 
 }

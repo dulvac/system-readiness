@@ -20,6 +20,7 @@ package org.apache.sling.systemreadiness.core.impl;
 
 import java.util.Map;
 
+import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
@@ -38,8 +39,7 @@ public class OsgiInstallerCheck implements SystemReadinessCheck {
     private BundleContext bundleContext;
 
     private int count = 0;
-    private String status = "Starting";
-    private boolean ready = false;
+    private CheckStatus state;
 
     @Activate
     protected void activate(final BundleContext ctx, final Map<String, Object> properties) throws InterruptedException {
@@ -54,27 +54,17 @@ public class OsgiInstallerCheck implements SystemReadinessCheck {
         this.bundleContext = null;
     }
 
-    /**
-     *
-     */
     @Override
-    public boolean isReady() {
-        return this.ready;
-    }
-
-    @Override
-    public String getStatus() {
-        return status;
+    public CheckStatus getStatus() {
+        return this.state;
     }
 
     public void frameworkEvent(FrameworkEvent event) {
         if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
             this.count ++;
-            this.ready = false;
-            this.status = "Received " + count + " startlevel changes so far";
+            this.state = new CheckStatus(CheckStatus.State.YELLOW, "Received " + count + " startlevel changes so far");
         } else if (event.getType() == FrameworkEvent.STARTED) {
-            this.status = "Osgi installer finished";
-            this.ready = true;
-        }
+            this.state = new CheckStatus(CheckStatus.State.GREEN, "Osgi installer finished");
+        } // TODO: RED on timeout?
     }
 }

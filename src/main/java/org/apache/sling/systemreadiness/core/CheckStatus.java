@@ -18,14 +18,31 @@
  */
 package org.apache.sling.systemreadiness.core;
 
-public class CheckState {
-    public static enum State { GREEN, YELLOW, RED };
+public class CheckStatus {
+    public enum State { GREEN(true), YELLOW(false), RED(false);
+        private boolean ready;
+
+        State(boolean ready) {
+            this.ready = ready;
+        }
+
+        public boolean isReady() {
+            return this.ready;
+        }
+
+        /**
+         * returns {{GREEN}} for {{true}} and {{YELLOW}} for {{false}}
+         */
+        public static State fromBoolean(boolean ready) {
+            return (ready) ? State.GREEN : State.YELLOW;
+        }
+    }
     
     private State state;
     
     private String details;
     
-    public CheckState(State state, String details) {
+    public CheckStatus(State state, String details) {
         this.state = state;
         this.details = details;
     }

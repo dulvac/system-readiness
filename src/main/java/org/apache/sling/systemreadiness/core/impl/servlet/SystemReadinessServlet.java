@@ -75,6 +75,7 @@ public class SystemReadinessServlet extends HttpServlet {
     @Activate
     protected void activate(final BundleContext ctx, final Map<String, Object> properties, final Config config) {
         final String path = config.osgi_http_whiteboard_servlet_pattern();
+        // TODO: configurable path
         LOG.info("Registered servlet to listen on {}", path);
     }
 
@@ -85,7 +86,7 @@ public class SystemReadinessServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // TODO: better response
-        if (!this.monitor.isReady()) {
+        if (!this.monitor.getStatus().getState().isReady()) {
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, INSTANCE_NOT_READY);
             return;
         } else {

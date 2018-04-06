@@ -31,12 +31,7 @@ public interface SystemReadinessCheck {
 
     /**
      *
-     * @return true if this check passes
+     * @return the state of the system
      */
-    boolean isReady();
-
-    /**
-     *
-     */
-    String getStatus();
+    CheckStatus getStatus();
 }
