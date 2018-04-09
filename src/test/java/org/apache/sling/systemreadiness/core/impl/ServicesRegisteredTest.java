@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.apache.sling.systemreadiness.core.impl.ServicesCheck;
 import org.apache.sling.systemreadiness.core.impl.ServicesCheck.Config;
 import org.junit.Before;
 import org.junit.Test;

@@ -16,14 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.systemreadiness.core.impl;
+package org.apache.sling.systemreadiness.core.osgi;
 
-import static org.ops4j.pax.exam.CoreOptions.bundle;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
-
-import java.net.MalformedURLException;
 
 import javax.inject.Inject;
 
@@ -37,28 +32,21 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.Filter;
-import org.osgi.framework.BundleContext;
 
 @RunWith(PaxExam.class)
-public class TestServicesCheck {
+public class ServicesCheckTest extends BaseTest {
     
     @Inject
     @Filter("(component.name=ServicesCheck)")
     SystemReadinessCheck check;
     
-    @Inject
-    BundleContext context;
-
     @Configuration
-    public Option[] configuration() throws MalformedURLException {
+    public Option[] configuration() {
         return new Option[] {
-                junitBundles(),
-                mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.scr").version("2.0.14"),
-                mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").version("1.8.16"),
-                bundle("reference:file:target/classes/"),
+                baseConfiguration(),
                 newConfiguration("ServicesCheck")
-                    .put("services.list", Runnable.class.getName())
-                    .asOption()
+                .put("services.list", Runnable.class.getName())
+                .asOption()
         };
     }
     
@@ -66,7 +54,7 @@ public class TestServicesCheck {
     public void test() {
         CheckStatus status = check.getStatus();
         Assert.assertEquals(State.YELLOW, status.getState());
-        Assert.assertEquals("Missing services : java.lang.Runnable", status.getDetails());
+        Assert.assertEquals("Missing service without matching component: java.lang.Runnable", status.getDetails());
         context.registerService(Runnable.class, () -> {}, null);
         CheckStatus status2 = check.getStatus();
         Assert.assertEquals(State.GREEN, status2.getState());

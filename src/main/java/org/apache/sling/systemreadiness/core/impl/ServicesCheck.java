@@ -23,14 +23,20 @@ import static java.util.stream.Collectors.toList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
+import org.apache.sling.systemreadiness.rootcause.DSComp;
+import org.apache.sling.systemreadiness.rootcause.DSRootCause;
+import org.apache.sling.systemreadiness.rootcause.RootCausePrinter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -54,9 +60,12 @@ public class ServicesCheck implements SystemReadinessCheck {
     }
 
     private Map<String, Tracker> trackers;
+    
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL)
+    DSRootCause analyzer;
 
     @Activate
-    protected void activate(final BundleContext ctx, final Config config) throws InterruptedException {
+    public void activate(final BundleContext ctx, final Config config) throws InterruptedException {
         trackers = new HashMap<>();
         for (String serviceName : config.services_list()) {
             Tracker tracker = new Tracker(ctx, serviceName);
@@ -79,14 +88,33 @@ public class ServicesCheck implements SystemReadinessCheck {
     }
 
     private String getDetails() {
+        List<String> missing = getMissing();
+        if (analyzer != null) {
+            StringBuilder missingSt = new StringBuilder();
+            RootCausePrinter printer = new RootCausePrinter(st -> missingSt.append(st + "\n"));
+            for (String iface : missing) {
+                Optional<DSComp> rootCause = analyzer.getRootCause(iface);
+                if (rootCause.isPresent()) {
+                    printer.print(rootCause.get());
+                } else {
+                    missingSt.append("Missing service without matching component: " + iface);
+                }
+            }
+            return missingSt.toString();
+        } else {
+            String missingSt = String.join(", ", missing);
+            return missing.size() > 0 
+                ? "Missing services : " + missingSt 
+                : "";
+        }
+    }
+
+    private List<String> getMissing() {
         List<String> missing = trackers.entrySet().stream()
                 .filter(entry -> !entry.getValue().present())
                 .map(entry -> entry.getKey())
                 .collect(toList());
-        String missingSt = String.join(", ", missing);
-        return missing.size() > 0 
-                ? "Missing services : " + missingSt 
-                : "";
+        return missing;
     }
 
 }

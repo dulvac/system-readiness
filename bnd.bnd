@@ -1,4 +1,6 @@
-Export-Package: org.apache.sling.systemreadiness.core
+Export-Package: \
+	org.apache.sling.systemreadiness.core,\
+	org.apache.sling.systemreadiness.rootcause
 Import-Package: \
 	javax.servlet*;resolution:=optional,\
 	*
