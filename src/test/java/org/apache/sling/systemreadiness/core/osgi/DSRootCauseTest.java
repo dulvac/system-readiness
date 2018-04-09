@@ -23,6 +23,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithCyclicRef;
@@ -94,9 +96,14 @@ public class DSRootCauseTest extends BaseTest {
     }
 
     private ComponentDescriptionDTO getComponentDesc(Class<?> compClass) {
-        return scr.getComponentDescriptionDTOs().stream()
+        Optional<ComponentDescriptionDTO> result = scr.getComponentDescriptionDTOs().stream()
                 .filter(desc -> desc.implementationClass.equals(compClass.getName()))
-                .findFirst().orElseThrow(() -> {throw new RuntimeException("Component " + compClass.getName() +" not found");});
+                .findFirst();
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            throw new RuntimeException("Component " + compClass.getName() +" not found");
+        }
     }
 
 }
