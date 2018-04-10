@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithCyclicRef;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingConfig;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingRef;
+import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingRef2;
 import org.apache.sling.systemreadiness.rootcause.DSComp;
 import org.apache.sling.systemreadiness.rootcause.DSRef;
 import org.apache.sling.systemreadiness.rootcause.DSRootCause;
@@ -62,6 +63,7 @@ public class DSRootCauseTest extends BaseTest {
                         .add(CompWithMissingConfig.class)
                         .add(CompWithMissingRef.class)
                         .add(CompWithCyclicRef.class)
+                        .add(CompWithMissingRef2.class)
                         )
         };
     }
@@ -86,6 +88,19 @@ public class DSRootCauseTest extends BaseTest {
         assertEquals(1, rootCause.unsatisfied.size());
         DSComp candidate = unsatisfied.candidates.iterator().next();
         assertEquals("CompWithMissingConfig", candidate.desc.name);
+        assertNull(candidate.config);
+    }
+    
+    @Test
+    public void testMissingRef2() throws InterruptedException {
+        ComponentDescriptionDTO desc = getComponentDesc(CompWithMissingRef2.class);
+        DSComp rootCause = dsRootCause.getRootCause(desc);
+        new RootCausePrinter().print(rootCause);
+        assertEquals(1, rootCause.unsatisfied.size());
+        DSRef unsatisfied = rootCause.unsatisfied.iterator().next();
+        assertEquals(1, rootCause.unsatisfied.size());
+        DSComp candidate = unsatisfied.candidates.iterator().next();
+        assertEquals("CompWithMissingRef", candidate.desc.name);
         assertNull(candidate.config);
     }
     

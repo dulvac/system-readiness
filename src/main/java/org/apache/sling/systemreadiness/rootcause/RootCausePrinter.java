@@ -37,14 +37,18 @@ public class RootCausePrinter {
     }
     
     public void print(DSComp comp, int level) {
-        if (comp.config == null) {
+        if (comp.config == null && "require".equals(comp.desc.configurationPolicy)) {
             println(level, "Component %s missing config on pid %s", comp.desc.name, Arrays.asList(comp.desc.configurationPid));
         } else {
             println(level, "Component %s unsatisfied references", comp.desc.name);
         }
         int l2 = level + 2;
+        int l3 = l2 + 2;
         for ( DSRef ref : comp.unsatisfied) {
             println(l2, "ref %s interface %s %s", ref.name, ref.iface, getFilterSt(ref.filter));
+            for (DSComp cand : ref.candidates) {
+                print(cand, l3);
+            }
         }
     }
 

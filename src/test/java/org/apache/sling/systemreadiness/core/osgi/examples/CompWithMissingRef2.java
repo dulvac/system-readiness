@@ -4,11 +4,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component(
-        name = "CompWithMissingRef",
-        service = CompWithMissingRef.class
+        name = "CompWithMissingRef2",
+        service = CompWithMissingRef2.class
         )
-public class CompWithMissingRef {
+public class CompWithMissingRef2 {
     @Reference
-    CompWithMissingConfig other;
-
+    CompWithMissingRef other;
 }
