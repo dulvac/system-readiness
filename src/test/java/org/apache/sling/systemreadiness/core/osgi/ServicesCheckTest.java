@@ -35,21 +35,21 @@ import org.ops4j.pax.exam.util.Filter;
 
 @RunWith(PaxExam.class)
 public class ServicesCheckTest extends BaseTest {
-    
+
     @Inject
     @Filter("(component.name=ServicesCheck)")
     SystemReadinessCheck check;
-    
+
     @Configuration
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
                 newConfiguration("ServicesCheck")
-                .put("services.list", Runnable.class.getName())
-                .asOption()
+                        .put("services.list", Runnable.class.getName())
+                        .asOption()
         };
     }
-    
+
     @Test
     public void test() {
         CheckStatus status = check.getStatus();

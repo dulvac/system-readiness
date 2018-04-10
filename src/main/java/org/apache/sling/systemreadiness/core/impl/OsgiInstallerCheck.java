@@ -22,18 +22,39 @@ import java.util.Map;
 
 import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
+
 @Component(
-        name = "OsgiInstallerCheck"
+        name = "OsgiInstallerCheck",
+        configurationPolicy = ConfigurationPolicy.REQUIRE
 )
+@Designate(ocd=OsgiInstallerCheck.Config.class)
 public class OsgiInstallerCheck implements SystemReadinessCheck {
+
+    @ObjectClassDefinition(
+            name="OSGi Installer System Readiness Check",
+            description="System readiness that waits for the framework started OSGi event"
+    )
+    public @interface Config {
+
+        @AttributeDefinition(name = "Timeout (seconds)", description = "Number of seconds after which this is considered a failure")
+        long timeout() default 1000;
+
+    }
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     private BundleContext bundleContext;
@@ -42,10 +63,16 @@ public class OsgiInstallerCheck implements SystemReadinessCheck {
     private CheckStatus state;
 
     @Activate
-    protected void activate(final BundleContext ctx, final Map<String, Object> properties) throws InterruptedException {
+    protected void activate(final BundleContext ctx, final Config config) throws InterruptedException {
         this.bundleContext = ctx;
         this.bundleContext.addFrameworkListener(this::frameworkEvent);
 
+        if (bundleContext.getBundle(0).getState() == Bundle.ACTIVE) {
+            // The system bundle was already started when I joined
+            this.state = new CheckStatus(GREEN, "Framework already started");
+        } else {
+            this.state = new CheckStatus(YELLOW, "No OSGi events received so far");
+        }
         log.info("Activated");
     }
 
@@ -62,9 +89,9 @@ public class OsgiInstallerCheck implements SystemReadinessCheck {
     public void frameworkEvent(FrameworkEvent event) {
         if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
             this.count ++;
-            this.state = new CheckStatus(CheckStatus.State.YELLOW, "Received " + count + " startlevel changes so far");
+            this.state = new CheckStatus(YELLOW, "Received " + count + " startlevel changes so far");
         } else if (event.getType() == FrameworkEvent.STARTED) {
-            this.state = new CheckStatus(CheckStatus.State.GREEN, "Osgi installer finished");
+            this.state = new CheckStatus(GREEN, "Osgi installer finished");
         } // TODO: RED on timeout?
     }
 }

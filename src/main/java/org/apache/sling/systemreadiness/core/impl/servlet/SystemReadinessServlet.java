@@ -87,11 +87,11 @@ public class SystemReadinessServlet extends HttpServlet {
             throws ServletException, IOException {
         // TODO: better response
         if (!this.monitor.isReady()) {
-            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, INSTANCE_NOT_READY);
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, INSTANCE_NOT_READY + "\n" + this.monitor.getStatuses());
             // TODO: statuses
             return;
         } else {
-            response.getWriter().print(INSTANCE_READY); // all servicechecks reported that they started.
+            response.getWriter().print(INSTANCE_READY + "\n" + this.monitor.getStatuses()); // all servicechecks reported that they started.
             response.flushBuffer();
         }
     }

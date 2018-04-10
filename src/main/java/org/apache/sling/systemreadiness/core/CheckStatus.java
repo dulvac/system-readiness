@@ -26,10 +26,6 @@ public class CheckStatus {
             this.ready = ready;
         }
 
-        public boolean isReady() {
-            return this.ready;
-        }
-
         /**
          * returns {{GREEN}} for {{true}} and {{YELLOW}} for {{false}}
          */
@@ -53,5 +49,13 @@ public class CheckStatus {
     
     public String getDetails() {
         return details;
+    }
+
+    @Override
+    public String toString() {
+        return "CheckStatus{" +
+                "state=" + state +
+                ", details='" + details + '\'' +
+                '}';
     }
 }
