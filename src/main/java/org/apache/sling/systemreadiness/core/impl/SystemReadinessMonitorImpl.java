@@ -30,6 +30,7 @@ import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.apache.sling.systemreadiness.core.SystemReady;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -76,7 +77,11 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     }
     
     private void check() {
-
+        if (context.getBundle(0).getState() != Bundle.ACTIVE) {
+            // Only do the actual checks once the framework is started
+            this.state.set(YELLOW);
+            return;
+        }
         CheckStatus.State currState = CheckStatus.State.fromBoolean(
                 checks.stream().allMatch(c -> c.getStatus().getState().isReady()));
         if (checks.stream().anyMatch(c -> c.getStatus().getState() == RED)) {
