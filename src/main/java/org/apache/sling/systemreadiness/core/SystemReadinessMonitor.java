@@ -26,5 +26,5 @@ import java.util.Map;
  */
 public interface SystemReadinessMonitor  {
     boolean isReady();
-    Map<String, CheckStatus> getStatuses();
+    Map<SystemReadinessCheck.Id, CheckStatus> getStatuses();
 }

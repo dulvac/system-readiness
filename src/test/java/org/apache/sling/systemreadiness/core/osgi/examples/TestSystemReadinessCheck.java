@@ -34,6 +34,11 @@ public class TestSystemReadinessCheck implements SystemReadinessCheck {
     }
 
     @Override
+    public String getName() {
+        return "Test Check";
+    }
+
+    @Override
     public CheckStatus getStatus() {
         if (null == ex.get()) {
             return new CheckStatus(state, state.name());

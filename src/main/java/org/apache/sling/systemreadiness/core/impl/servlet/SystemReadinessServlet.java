@@ -63,14 +63,14 @@ public class SystemReadinessServlet extends HttpServlet {
 
     }
 
-    private static final String INSTANCE_READY = "Instance ready";
-
-    private static final String INSTANCE_NOT_READY = "Instance not ready";
-    private static final String DEFAULT_PATH = "/system/console/ready";
-    private static final Logger LOG = LoggerFactory.getLogger(SystemReadinessServlet.class);
-
     @Reference
     private SystemReadinessMonitor monitor;
+
+    private static final String INSTANCE_READY = "Instance ready";
+    private static final String INSTANCE_NOT_READY = "Instance not ready";
+    private static final String DEFAULT_PATH = "/system/console/ready";
+
+    private static final Logger LOG = LoggerFactory.getLogger(SystemReadinessServlet.class);
 
     @Activate
     protected void activate(final BundleContext ctx, final Map<String, Object> properties, final Config config) {

@@ -81,6 +81,11 @@ public class ServicesCheck implements SystemReadinessCheck {
 
 
     @Override
+    public String getName() {
+        return "Services Check";
+    }
+
+    @Override
     public CheckStatus getStatus() {
         // TODO: RED on timeouts
         final CheckStatus.State state = CheckStatus.State.fromBoolean(trackers.values().stream().allMatch(tracker -> tracker.present()));

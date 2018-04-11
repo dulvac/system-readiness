@@ -29,7 +29,7 @@ public class CheckStatus {
     }
     
     private State state;
-    
+
     private String details;
     
     public CheckStatus(State state, String details) {

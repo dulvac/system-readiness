@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
-        name = "OsgiInstallerCheck",
+        name = "FrameworkStartCheck",
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
 @Designate(ocd=FrameworkStartCheck.Config.class)
@@ -77,6 +77,11 @@ public class FrameworkStartCheck implements SystemReadinessCheck {
     @Deactivate
     protected void deactivate() throws InterruptedException {
         this.bundleContext = null;
+    }
+
+    @Override
+    public String getName() {
+        return "Framework Start Check";
     }
 
     @Override

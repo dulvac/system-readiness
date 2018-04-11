@@ -29,12 +29,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.apache.sling.systemreadiness.core.CheckStatus;
-import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
-import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
-import org.apache.sling.systemreadiness.core.SystemReady;
+import org.apache.sling.systemreadiness.core.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -75,7 +74,7 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
 
     private AtomicReference<CheckStatus.State> state;
 
-    private Map<String, CheckStatus> statuses;
+    private Map<SystemReadinessCheck.Id, CheckStatus> statuses;
 
     private BundleContext context;
 
@@ -111,7 +110,7 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     /**
      * Returns a map of the statuses of all the checks
      */
-    public Map<String, CheckStatus> getStatuses() {
+    public Map<SystemReadinessCheck.Id, CheckStatus> getStatuses() {
         return this.statuses;
     }
 
@@ -122,16 +121,15 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
                 this.state.set(YELLOW);
                 return;
             }
-            CheckStatus.State currState = CheckStatus.State.fromBoolean(
-                    checks.stream().allMatch(c -> this.getStatus(c).getState() == GREEN));
-            if (checks.stream().anyMatch(c -> this.getStatus(c).getState() == RED)) {
-                currState = RED;
-            }
+            CheckStatus.State currState = (checks.stream().anyMatch(is(RED)))
+                    ? RED
+                    : CheckStatus.State.fromBoolean(checks.stream().allMatch(is(GREEN)));
+
             CheckStatus.State prevState = this.state.getAndSet(currState);
 
             // get statuses
-            // TODO: key
-            this.statuses = checks.stream().collect(Collectors.toMap(c -> c.toString(), this::getStatus));
+            this.statuses = checks.stream().collect(Collectors.toMap(
+                    c -> new SystemReadinessCheck.Id(c), SystemReadinessMonitorImpl::getStatus));
 
             if (currState == prevState) {
                 return;
@@ -142,24 +140,29 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
             }
 
             if (currState == GREEN) {
-                SystemReady readyService = new SystemReady() {
-                };
+                SystemReady readyService = new SystemReady() {};
                 sreg = context.registerService(SystemReady.class, readyService, null);
             } else {
                 sreg.unregister();
             }
         } catch (Throwable e) {
             this.state.set(RED);
-            log.error("failed to monitor", e);
+            log.error("Failed to monitor", e);
         }
     }
 
-    private final CheckStatus getStatus(SystemReadinessCheck c) {
+    private static final CheckStatus getStatus(SystemReadinessCheck c) {
         try {
             return c.getStatus();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return new CheckStatus(RED, e.getMessage());
         }
 
     }
+
+    private static Predicate<SystemReadinessCheck> is(CheckStatus.State state) {
+        return (c) -> getStatus(c).getState() == state;
+    }
+
+
 }

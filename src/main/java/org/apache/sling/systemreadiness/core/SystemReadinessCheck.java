@@ -18,6 +18,8 @@
  */
 package org.apache.sling.systemreadiness.core;
 
+import java.util.UUID;
+
 /**
  * Readiness check services provide custom logic for signalling
  * that particular criteria are met for when an instance is considered "ready".
@@ -31,7 +33,38 @@ public interface SystemReadinessCheck {
 
     /**
      *
+     * @return the name of this check. E.g. component name
+     */
+    String getName();
+
+    /**
+     *
      * @return the state of the system
      */
     CheckStatus getStatus();
+
+    /**
+     * Holds a unique id and the name of a System readiness check
+     */
+    class Id {
+        UUID id;
+        String name;
+
+        public Id(UUID id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Id(SystemReadinessCheck check) {
+            this(UUID.randomUUID(), check.getName());
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 }
