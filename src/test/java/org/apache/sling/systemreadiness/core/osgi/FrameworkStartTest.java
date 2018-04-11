@@ -34,7 +34,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.Filter;
 
 @RunWith(PaxExam.class)
-public class OSGiInstallerTest extends BaseTest {
+public class FrameworkStartTest extends BaseTest {
 
     @Inject
     @Filter("(component.name=OsgiInstallerCheck)")

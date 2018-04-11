@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
         name = "OsgiInstallerCheck",
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd=OsgiInstallerCheck.Config.class)
-public class OsgiInstallerCheck implements SystemReadinessCheck {
+@Designate(ocd=FrameworkStartCheck.Config.class)
+public class FrameworkStartCheck implements SystemReadinessCheck {
 
     @ObjectClassDefinition(
             name="OSGi Installer System Readiness Check",
