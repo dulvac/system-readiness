@@ -18,7 +18,8 @@
  */
 package org.apache.sling.systemreadiness.core.impl;
 
-import java.util.Map;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
 
 import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
@@ -34,9 +35,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
 
 @Component(
         name = "OsgiInstallerCheck",

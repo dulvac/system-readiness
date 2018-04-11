@@ -19,8 +19,8 @@
 package org.apache.sling.systemreadiness.core.osgi;
 
 import static org.ops4j.pax.exam.CoreOptions.bundle;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import javax.inject.Inject;
 
@@ -34,10 +34,14 @@ public class BaseTest {
 
     public Option baseConfiguration() {
         return CoreOptions.composite(
-                junitBundles(),
+                systemProperty("pax.exam.invoker").value("junit"),
+                bundle("link:classpath:META-INF/links/org.ops4j.pax.tipi.junit.link"),
+                bundle("link:classpath:META-INF/links/org.ops4j.pax.exam.invoker.junit.link"),
+                mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").version("1.3_1"),
+                mavenBundle().groupId("org.awaitility").artifactId("awaitility").version("3.1.0"),
+
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.scr").version("2.0.14"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").version("1.8.16"),
-                mavenBundle().groupId("org.awaitility").artifactId("awaitility").version("3.1.0"),
                 bundle("reference:file:target/classes/")
         );
     }
