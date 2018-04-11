@@ -18,21 +18,18 @@
  */
 package org.apache.sling.systemreadiness.core.impl;
 
-import java.io.IOException;
-import java.util.Arrays;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.RED;
+import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
@@ -41,17 +38,17 @@ import org.apache.sling.systemreadiness.core.SystemReady;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.RED;
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
 
 @Component(
         name = "SystemReadinessMonitor"

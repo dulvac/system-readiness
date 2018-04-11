@@ -19,13 +19,7 @@
 package org.apache.sling.systemreadiness.core;
 
 public class CheckStatus {
-    public enum State { GREEN(true), YELLOW(false), RED(false);
-        private boolean ready;
-
-        State(boolean ready) {
-            this.ready = ready;
-        }
-
+    public enum State { GREEN, YELLOW, RED;
         /**
          * returns {{GREEN}} for {{true}} and {{YELLOW}} for {{false}}
          */

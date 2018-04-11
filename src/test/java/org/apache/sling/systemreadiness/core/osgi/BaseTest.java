@@ -37,6 +37,7 @@ public class BaseTest {
                 junitBundles(),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.scr").version("2.0.14"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").version("1.8.16"),
+                mavenBundle().groupId("org.awaitility").artifactId("awaitility").version("3.1.0"),
                 bundle("reference:file:target/classes/")
         );
     }
