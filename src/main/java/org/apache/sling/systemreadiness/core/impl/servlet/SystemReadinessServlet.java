@@ -18,7 +18,10 @@
  */
 package org.apache.sling.systemreadiness.core.impl.servlet;
 
+import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
+
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -27,7 +30,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
+import org.apache.sling.systemreadiness.core.SystemStatus;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -66,8 +71,6 @@ public class SystemReadinessServlet extends HttpServlet {
     @Reference
     private SystemReadinessMonitor monitor;
 
-    private static final String INSTANCE_READY = "Instance ready";
-    private static final String INSTANCE_NOT_READY = "Instance not ready";
     private static final String DEFAULT_PATH = "/system/console/ready";
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemReadinessServlet.class);
@@ -85,15 +88,13 @@ public class SystemReadinessServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // TODO: better response
-        if (!this.monitor.isReady()) {
-            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, INSTANCE_NOT_READY + "\n" + this.monitor.getStatuses());
-            // TODO: statuses
-            return;
-        } else {
-            response.getWriter().print(INSTANCE_READY + "\n" + this.monitor.getStatuses()); // all servicechecks reported that they started.
-            response.flushBuffer();
+        SystemStatus systemState = this.monitor.getStatus();
+        PrintWriter writer = response.getWriter();
+        
+        if (! (systemState.getState() == GREEN)) {
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
+        new StatusWriterJson(writer).write(systemState);
     }
 
 }

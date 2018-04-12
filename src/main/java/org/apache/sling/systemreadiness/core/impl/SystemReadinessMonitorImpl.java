@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.sling.systemreadiness.core.*;
+import org.apache.sling.systemreadiness.core.Status.State;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -69,22 +70,19 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     @Reference(policyOption = ReferencePolicyOption.GREEDY, policy = ReferencePolicy.DYNAMIC)
     private volatile List<SystemReadinessCheck> checks;
 
-    private AtomicReference<Status.State> state;
-
-    private Collection<CheckStatus> statuses;
-
     private BundleContext context;
 
     private ServiceRegistration<SystemReady> sreg;
 
     private ScheduledExecutorService executor;
+    
+    private AtomicReference<SystemStatus> systemState;
 
 
     @Activate
     public void activate(BundleContext context, final Config config) {
         this.context = context;
-        this.state = new AtomicReference<>(YELLOW);
-        this.statuses = Collections.emptyList();
+        this.systemState = new AtomicReference<>(new SystemStatus(State.YELLOW, Collections.emptyList()));
         this.executor = Executors.newSingleThreadScheduledExecutor();
         this.executor.scheduleAtFixedRate(this::check, 0, config.frequency(), TimeUnit.MILLISECONDS);
         log.info("Activated");
@@ -100,54 +98,54 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
      * Returns whether the system is ready or not
      */
     public boolean isReady() {
-        return state.get() == GREEN;
+        return systemState.get().getState() == GREEN;
     }
 
     @Override
     /**
      * Returns a map of the statuses of all the checks
      */
-    public Collection<CheckStatus> getStatuses() {
-        return this.statuses;
+    public SystemStatus getStatus() {
+        return systemState.get();
     }
 
     private void check() {
-        try {
+        // If there is no {{FrameworkStartCheck}}, only do the actual checks once the framework is started
+        if ((checks.stream().noneMatch(c -> c.getClass().equals(FrameworkStartCheck.class)))
+                && context.getBundle(0).getState() != Bundle.ACTIVE) {
+            systemState.set(new SystemStatus(YELLOW, Collections.emptyList()));
+            return;
+        }
 
-            // If there is no {{FrameworkStartCheck}}, only do the actual checks once the framework is started
-            if ((checks.stream().noneMatch(c -> c.getClass().equals(FrameworkStartCheck.class)))
-                    && context.getBundle(0).getState() != Bundle.ACTIVE) {
-                this.state.set(YELLOW);
-                return;
-            }
+        Status.State prevState = systemState.get().getState();
 
-            Status.State currState = checks.stream().anyMatch(hasState(RED))
-                    ? RED
-                    : Status.State.fromBoolean(checks.stream().allMatch(hasState(GREEN)));
-            Status.State prevState = this.state.getAndSet(currState);
+        // get statuses
+        List<CheckStatus> statuses = evaluateAllChecks();
+        
+        Status.State currState = State.worstOf(statuses.stream().map(status -> status.getStatus().getState()));
 
-            // get statuses
-            this.statuses = checks.stream().map(SystemReadinessMonitorImpl::getStatus)
-                    .sorted(Comparator.comparing(CheckStatus::getCheckName)).collect(Collectors.toList());
+        this.systemState.set(new SystemStatus(currState, statuses));
+        if (currState == prevState) {
+            return;
+        }
 
-            if (currState == prevState) {
-                return;
-            }
+        manageMarkerService(currState);
+    }
 
-            if (currState == RED) {
-                // TODO: do we allow it to change state from red? For now, yes.
-            }
-
-            if (currState == GREEN) {
-                SystemReady readyService = new SystemReady() {
-                };
-                sreg = context.registerService(SystemReady.class, readyService, null);
-            } else {
-                sreg.unregister();
-            }
-        } catch (Throwable e) {
-            this.state.set(RED);
-            log.error("Failed to monitor", e);
+    private List<CheckStatus> evaluateAllChecks() {
+        return checks.stream()
+                .map(SystemReadinessMonitorImpl::getStatus)
+                .sorted(Comparator.comparing(CheckStatus::getCheckName))
+                .collect(Collectors.toList());
+    }
+    
+    private void manageMarkerService(Status.State currState) {
+        if (currState == GREEN) {
+            SystemReady readyService = new SystemReady() {
+            };
+            sreg = context.registerService(SystemReady.class, readyService, null);
+        } else {
+            sreg.unregister();
         }
     }
 
@@ -157,12 +155,6 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
         } catch (Throwable e) {
             return new CheckStatus(c.getClass().getName(), new Status(RED, e.getMessage()));
         }
-
     }
-
-    private static Predicate<SystemReadinessCheck> hasState(Status.State state) {
-        return c -> getStatus(c).getStatus().getState() == state;
-    }
-
 
 }

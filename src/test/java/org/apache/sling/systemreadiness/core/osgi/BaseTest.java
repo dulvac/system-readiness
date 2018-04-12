@@ -35,6 +35,7 @@ public class BaseTest {
     public Option baseConfiguration() {
         return CoreOptions.composite(
                 systemProperty("pax.exam.invoker").value("junit"),
+                systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
                 bundle("link:classpath:META-INF/links/org.ops4j.pax.tipi.junit.link"),
                 bundle("link:classpath:META-INF/links/org.ops4j.pax.exam.invoker.junit.link"),
                 mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").version("1.3_1"),

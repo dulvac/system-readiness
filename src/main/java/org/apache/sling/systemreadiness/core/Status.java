@@ -18,13 +18,22 @@
  */
 package org.apache.sling.systemreadiness.core;
 
+import static java.util.stream.Collectors.minBy;
+
+import java.util.stream.Stream;
+
 public class Status {
-    public enum State { GREEN, YELLOW, RED;
+    // Be aware that the order of the enum declarations matters for the Comparator
+    public enum State { RED, YELLOW, GREEN;
         /**
          * returns {{GREEN}} for {{true}} and {{YELLOW}} for {{false}}
          */
         public static State fromBoolean(boolean ready) {
             return (ready) ? State.GREEN : State.YELLOW;
+        }
+        
+        public static State worstOf(Stream<State> states) {
+            return states.collect(minBy(State::compareTo)).orElse(State.GREEN);
         }
     }
     
@@ -52,4 +61,6 @@ public class Status {
                 ", details='" + details + '\'' +
                 '}';
     }
+    
+    
 }

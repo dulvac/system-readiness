@@ -18,11 +18,26 @@
  */
 package org.apache.sling.systemreadiness.core;
 
-/**
- * Checks that all registered checks report ready
- * TODO
- */
-public interface SystemReadinessMonitor  {
-    boolean isReady();
-    SystemStatus getStatus();
+import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
+import static org.apache.sling.systemreadiness.core.Status.State.RED;
+import static org.apache.sling.systemreadiness.core.Status.State.YELLOW;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+
+import java.util.Arrays;
+
+import org.apache.sling.systemreadiness.core.Status.State;
+import org.junit.Test;
+
+public class StateTest {
+    
+    @Test
+    public void testCompare() {
+        assertThat(worstOf(GREEN, YELLOW), equalTo(YELLOW));
+        assertThat(worstOf(GREEN, YELLOW, RED), equalTo(RED));
+    }
+
+    private State worstOf(State...states) {
+        return State.worstOf(Arrays.asList(states).stream());
+    }
 }

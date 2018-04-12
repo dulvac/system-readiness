@@ -22,7 +22,7 @@ import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
 import static org.apache.sling.systemreadiness.core.Status.State.RED;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
 
@@ -65,12 +65,12 @@ public class SystemReadinessMonitorTest extends BaseTest {
     @Test
     public void test() throws InterruptedException {
         Awaitility.setDefaultPollDelay(0, TimeUnit.MILLISECONDS);
-        assertThat("Statuses should be empty", monitor.getStatuses().size(), is(0));
+        assertNumChecks(0);
         wait.until(monitor::isReady, is(true));
 
         TestSystemReadinessCheck check = new TestSystemReadinessCheck();
         context.registerService(SystemReadinessCheck.class, check, null);
-        wait.until(() -> monitor.getStatuses().size(), is(1));
+        assertNumChecks(1);
         wait.until(monitor::isReady, is(false));
 
         // make the status green
@@ -80,21 +80,21 @@ public class SystemReadinessMonitorTest extends BaseTest {
         // make the status fail and check that the monitor handles that
         check.exception();
         wait.until(monitor::isReady, is(false));
-        wait.until(() -> monitor.getStatuses().size(), is(1));
-        final CheckStatus status = monitor.getStatuses().iterator().next();
+        assertNumChecks(1);
+        final CheckStatus status = monitor.getStatus().getCheckStates().iterator().next();
         assertThat(status.getCheckName(), is(check.getClass().getName()));
         assertThat(status.getStatus().getState(), is(RED));
         assertThat(status.getStatus().getDetails(), containsString("Failure"));
 
         check.setInternalState(RED);
-        wait.until(() -> monitor.getStatuses().size(), is(1));
+        assertNumChecks(1);
         wait.until(monitor::isReady, is(false));
 
 
         // register a second check
         TestSystemReadinessCheck check2 = new TestSystemReadinessCheck();
         context.registerService(SystemReadinessCheck.class, check2, null);
-        wait.until(() -> monitor.getStatuses().size(), is(2));
+        assertNumChecks(2);
         wait.until(monitor::isReady, is(false));
 
         check2.setInternalState(GREEN);
@@ -103,5 +103,9 @@ public class SystemReadinessMonitorTest extends BaseTest {
         check.setInternalState(GREEN);
         wait.until(monitor::isReady, is(true));
 
+    }
+
+    private void assertNumChecks(int expectedNum) {
+        wait.until(() -> monitor.getStatus().getCheckStates().size(), is(expectedNum));
     }
 }
