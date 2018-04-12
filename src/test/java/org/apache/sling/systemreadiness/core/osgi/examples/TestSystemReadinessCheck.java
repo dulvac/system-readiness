@@ -47,7 +47,7 @@ public class TestSystemReadinessCheck implements SystemReadinessCheck {
         }
     }
 
-    public void setState(State state) {
+    public void setInternalState(State state) {
         this.ex.set(null);
         this.state = state;
     }
