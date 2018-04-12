@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
 @Designate(ocd=FrameworkStartCheck.Config.class)
 public class FrameworkStartCheck implements SystemReadinessCheck {
 
+    public static final String FRAMEWORK_STARTED = "Framework started";
+
     @ObjectClassDefinition(
             name="OSGi Installer System Readiness Check",
             description="System readiness that waits for the framework started OSGi event"
@@ -67,9 +69,9 @@ public class FrameworkStartCheck implements SystemReadinessCheck {
 
         if (bundleContext.getBundle(0).getState() == Bundle.ACTIVE) {
             // The system bundle was already started when I joined
-            this.state = new CheckStatus(GREEN, "Framework already started");
+            this.state = new CheckStatus(GREEN, FRAMEWORK_STARTED);
         } else {
-            this.state = new CheckStatus(YELLOW, "No OSGi events received so far");
+            this.state = new CheckStatus(YELLOW, "No OSGi Framework events received so far");
         }
         log.info("Activated");
     }
@@ -94,7 +96,7 @@ public class FrameworkStartCheck implements SystemReadinessCheck {
             this.count ++;
             this.state = new CheckStatus(YELLOW, "Received " + count + " startlevel changes so far");
         } else if (event.getType() == FrameworkEvent.STARTED) {
-            this.state = new CheckStatus(GREEN, "Osgi installer finished");
+            this.state = new CheckStatus(GREEN, FRAMEWORK_STARTED);
         } // TODO: RED on timeout?
     }
 }

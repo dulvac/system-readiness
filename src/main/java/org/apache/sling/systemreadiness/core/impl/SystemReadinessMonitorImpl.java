@@ -115,20 +115,21 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
 
     private void check() {
         try {
-            if (context.getBundle(0).getState() != Bundle.ACTIVE) {
-                // Only do the actual checks once the framework is started
+
+            // If there is no {{FrameworkStartCheck}}, only do the actual checks once the framework is started
+            if ((checks.stream().noneMatch(c-> c.getClass().equals(FrameworkStartCheck.class)))
+                && context.getBundle(0).getState() != Bundle.ACTIVE) {
                 this.state.set(YELLOW);
                 return;
             }
-            CheckStatus.State currState = (checks.stream().anyMatch(is(RED)))
-                    ? RED
-                    : CheckStatus.State.fromBoolean(checks.stream().allMatch(is(GREEN)));
 
+            CheckStatus.State currState = checks.stream().anyMatch(hasState(RED))
+                    ? RED
+                    : CheckStatus.State.fromBoolean(checks.stream().allMatch(hasState(GREEN)));
             CheckStatus.State prevState = this.state.getAndSet(currState);
 
             // get statuses
-            this.statuses = checks.stream().collect(Collectors.toMap(
-                    c -> new SystemReadinessCheck.Id(c), SystemReadinessMonitorImpl::getStatus));
+            this.statuses = checks.stream().collect(Collectors.toMap(SystemReadinessCheck.Id::new, SystemReadinessMonitorImpl::getStatus));
 
             if (currState == prevState) {
                 return;
@@ -159,8 +160,8 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
 
     }
 
-    private static Predicate<SystemReadinessCheck> is(CheckStatus.State state) {
-        return (c) -> getStatus(c).getState() == state;
+    private static Predicate<SystemReadinessCheck> hasState(CheckStatus.State state) {
+        return c -> getStatus(c).getState() == state;
     }
 
 
