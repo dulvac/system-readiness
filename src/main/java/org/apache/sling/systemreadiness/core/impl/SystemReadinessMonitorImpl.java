@@ -18,13 +18,11 @@
  */
 package org.apache.sling.systemreadiness.core.impl;
 
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.RED;
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
+import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
+import static org.apache.sling.systemreadiness.core.Status.State.RED;
+import static org.apache.sling.systemreadiness.core.Status.State.YELLOW;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -51,12 +49,12 @@ import org.slf4j.LoggerFactory;
 @Component(
         name = "SystemReadinessMonitor"
 )
-@Designate(ocd=SystemReadinessMonitorImpl.Config.class)
+@Designate(ocd = SystemReadinessMonitorImpl.Config.class)
 public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
 
     @ObjectClassDefinition(
-            name="System Readiness Monitor",
-            description="System readiness monitor for System Readiness Checks"
+            name = "System Readiness Monitor",
+            description = "System readiness monitor for System Readiness Checks"
     )
     public @interface Config {
 
@@ -71,9 +69,9 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     @Reference(policyOption = ReferencePolicyOption.GREEDY, policy = ReferencePolicy.DYNAMIC)
     private volatile List<SystemReadinessCheck> checks;
 
-    private AtomicReference<CheckStatus.State> state;
+    private AtomicReference<Status.State> state;
 
-    private Map<SystemReadinessCheck.Id, CheckStatus> statuses;
+    private Collection<CheckStatus> statuses;
 
     private BundleContext context;
 
@@ -86,9 +84,9 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     public void activate(BundleContext context, final Config config) {
         this.context = context;
         this.state = new AtomicReference<>(YELLOW);
-        this.statuses = Collections.emptyMap();
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(this::check, 0, config.frequency(), TimeUnit.MILLISECONDS);
+        this.statuses = Collections.emptyList();
+        this.executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor.scheduleAtFixedRate(this::check, 0, config.frequency(), TimeUnit.MILLISECONDS);
         log.info("Activated");
     }
 
@@ -109,7 +107,7 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     /**
      * Returns a map of the statuses of all the checks
      */
-    public Map<SystemReadinessCheck.Id, CheckStatus> getStatuses() {
+    public Collection<CheckStatus> getStatuses() {
         return this.statuses;
     }
 
@@ -117,19 +115,20 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
         try {
 
             // If there is no {{FrameworkStartCheck}}, only do the actual checks once the framework is started
-            if ((checks.stream().noneMatch(c-> c.getClass().equals(FrameworkStartCheck.class)))
-                && context.getBundle(0).getState() != Bundle.ACTIVE) {
+            if ((checks.stream().noneMatch(c -> c.getClass().equals(FrameworkStartCheck.class)))
+                    && context.getBundle(0).getState() != Bundle.ACTIVE) {
                 this.state.set(YELLOW);
                 return;
             }
 
-            CheckStatus.State currState = checks.stream().anyMatch(hasState(RED))
+            Status.State currState = checks.stream().anyMatch(hasState(RED))
                     ? RED
-                    : CheckStatus.State.fromBoolean(checks.stream().allMatch(hasState(GREEN)));
-            CheckStatus.State prevState = this.state.getAndSet(currState);
+                    : Status.State.fromBoolean(checks.stream().allMatch(hasState(GREEN)));
+            Status.State prevState = this.state.getAndSet(currState);
 
             // get statuses
-            this.statuses = checks.stream().collect(Collectors.toMap(SystemReadinessCheck.Id::new, SystemReadinessMonitorImpl::getStatus));
+            this.statuses = checks.stream().map(SystemReadinessMonitorImpl::getStatus)
+                    .sorted(Comparator.comparing(CheckStatus::getCheckName)).collect(Collectors.toList());
 
             if (currState == prevState) {
                 return;
@@ -140,7 +139,8 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
             }
 
             if (currState == GREEN) {
-                SystemReady readyService = new SystemReady() {};
+                SystemReady readyService = new SystemReady() {
+                };
                 sreg = context.registerService(SystemReady.class, readyService, null);
             } else {
                 sreg.unregister();
@@ -153,15 +153,15 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
 
     private static final CheckStatus getStatus(SystemReadinessCheck c) {
         try {
-            return c.getStatus();
+            return new CheckStatus(c.getName(), c.getStatus());
         } catch (Throwable e) {
-            return new CheckStatus(RED, e.getMessage());
+            return new CheckStatus(c.getClass().getName(), new Status(RED, e.getMessage()));
         }
 
     }
 
-    private static Predicate<SystemReadinessCheck> hasState(CheckStatus.State state) {
-        return c -> getStatus(c).getState() == state;
+    private static Predicate<SystemReadinessCheck> hasState(Status.State state) {
+        return c -> getStatus(c).getStatus().getState() == state;
     }
 
 

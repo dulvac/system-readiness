@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.apache.sling.systemreadiness.core.CheckStatus;
+import org.apache.sling.systemreadiness.core.Status;
 
 public class StatusWriter {
 
@@ -34,17 +34,17 @@ public class StatusWriter {
         this.writer = writer;
     }
     
-    public void write(Map<String, CheckStatus> stateMap) throws XMLStreamException {
+    public void write(Map<String, Status> stateMap) throws XMLStreamException {
         writer.writeStartDocument();
         writer.writeStartElement("systemstatus");
-        for (Entry<String, CheckStatus> entry : stateMap.entrySet()) {
+        for (Entry<String, Status> entry : stateMap.entrySet()) {
             write(entry.getKey(), entry.getValue());
         }
         writer.writeEndElement();
         writer.writeEndDocument();
     }
 
-    private void write(String name, CheckStatus status) throws XMLStreamException {
+    private void write(String name, Status status) throws XMLStreamException {
         writer.writeStartElement("status");
         writer.writeAttribute("check", name);
         writer.writeAttribute("status", status.getState().name());

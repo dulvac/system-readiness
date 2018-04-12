@@ -20,8 +20,8 @@ package org.apache.sling.systemreadiness.core.osgi.examples;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.sling.systemreadiness.core.CheckStatus;
-import org.apache.sling.systemreadiness.core.CheckStatus.State;
+import org.apache.sling.systemreadiness.core.Status;
+import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 
 public class TestSystemReadinessCheck implements SystemReadinessCheck {
@@ -39,9 +39,9 @@ public class TestSystemReadinessCheck implements SystemReadinessCheck {
     }
 
     @Override
-    public CheckStatus getStatus() {
+    public Status getStatus() {
         if (null == ex.get()) {
-            return new CheckStatus(state, state.name());
+            return new Status(state, state.name());
         } else {
             throw ex.get();
         }

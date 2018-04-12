@@ -25,8 +25,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.apache.sling.systemreadiness.core.CheckStatus;
-import org.apache.sling.systemreadiness.core.CheckStatus.State;
+import org.apache.sling.systemreadiness.core.Status;
+import org.apache.sling.systemreadiness.core.Status.State;
 import org.junit.Test;
 
 public class StatusWriterTest {
@@ -35,8 +35,8 @@ public class StatusWriterTest {
         XMLOutputFactory output = XMLOutputFactory.newInstance();
         XMLStreamWriter writer = output.createXMLStreamWriter(System.out);
         StatusWriter swriter = new StatusWriter(writer);
-        Map<String, CheckStatus> statusMap = new HashMap<>();
-        statusMap.put("my", new CheckStatus(State.GREEN, "Some details\nsSome more details"));
+        Map<String, Status> statusMap = new HashMap<>();
+        statusMap.put("my", new Status(State.GREEN, "Some details\nsSome more details"));
         swriter.write(statusMap);
         swriter.close();
     }

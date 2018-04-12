@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.sling.systemreadiness.core.CheckStatus;
+import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.rootcause.DSComp;
 import org.apache.sling.systemreadiness.rootcause.DSRootCause;
@@ -86,10 +86,10 @@ public class ServicesCheck implements SystemReadinessCheck {
     }
 
     @Override
-    public CheckStatus getStatus() {
+    public Status getStatus() {
         // TODO: RED on timeouts
-        final CheckStatus.State state = CheckStatus.State.fromBoolean(trackers.values().stream().allMatch(tracker -> tracker.present()));
-        return new CheckStatus(state, getDetails()); // TODO: out of sync? do we care?
+        final Status.State state = Status.State.fromBoolean(trackers.values().stream().allMatch(tracker -> tracker.present()));
+        return new Status(state, getDetails()); // TODO: out of sync? do we care?
     }
 
     private String getDetails() {

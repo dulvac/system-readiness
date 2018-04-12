@@ -18,8 +18,8 @@
  */
 package org.apache.sling.systemreadiness.core.osgi;
 
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.RED;
+import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
+import static org.apache.sling.systemreadiness.core.Status.State.RED;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.sling.systemreadiness.core.CheckStatus;
+import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.apache.sling.systemreadiness.core.osgi.examples.TestSystemReadinessCheck;
@@ -78,9 +79,10 @@ public class SystemReadinessMonitorTest extends BaseTest {
 
         check.exception();
         wait.until(monitor::isReady, is(false));
-        final CheckStatus status = monitor.getStatuses().values().iterator().next();
-        assertThat(status.getState(), is(RED));
-        assertThat(status.getDetails(), containsString("Failure"));
+        wait.until(() -> monitor.getStatuses().size(), is(1));
+        final CheckStatus status = monitor.getStatuses().iterator().next();
+        assertThat(status.getStatus().getState(), is(RED));
+        assertThat(status.getStatus().getDetails(), containsString("Failure"));
 
         check.setState(RED);
         wait.until(() -> monitor.getStatuses().size(), is(1));

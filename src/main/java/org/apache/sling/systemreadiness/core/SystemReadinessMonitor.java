@@ -18,7 +18,7 @@
  */
 package org.apache.sling.systemreadiness.core;
 
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * Checks that all registered checks report ready
@@ -26,5 +26,5 @@ import java.util.Map;
  */
 public interface SystemReadinessMonitor  {
     boolean isReady();
-    Map<SystemReadinessCheck.Id, CheckStatus> getStatuses();
+    Collection<CheckStatus> getStatuses();
 }

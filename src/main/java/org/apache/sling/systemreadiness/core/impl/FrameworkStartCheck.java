@@ -18,10 +18,10 @@
  */
 package org.apache.sling.systemreadiness.core.impl;
 
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.GREEN;
-import static org.apache.sling.systemreadiness.core.CheckStatus.State.YELLOW;
+import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
+import static org.apache.sling.systemreadiness.core.Status.State.YELLOW;
 
-import org.apache.sling.systemreadiness.core.CheckStatus;
+import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -60,7 +60,7 @@ public class FrameworkStartCheck implements SystemReadinessCheck {
     private BundleContext bundleContext;
 
     private int count = 0;
-    private CheckStatus state;
+    private Status state;
 
     @Activate
     protected void activate(final BundleContext ctx, final Config config) throws InterruptedException {
@@ -69,9 +69,9 @@ public class FrameworkStartCheck implements SystemReadinessCheck {
 
         if (bundleContext.getBundle(0).getState() == Bundle.ACTIVE) {
             // The system bundle was already started when I joined
-            this.state = new CheckStatus(GREEN, FRAMEWORK_STARTED);
+            this.state = new Status(GREEN, FRAMEWORK_STARTED);
         } else {
-            this.state = new CheckStatus(YELLOW, "No OSGi Framework events received so far");
+            this.state = new Status(YELLOW, "No OSGi Framework events received so far");
         }
         log.info("Activated");
     }
@@ -87,16 +87,16 @@ public class FrameworkStartCheck implements SystemReadinessCheck {
     }
 
     @Override
-    public CheckStatus getStatus() {
+    public Status getStatus() {
         return this.state;
     }
 
     public void frameworkEvent(FrameworkEvent event) {
         if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
             this.count ++;
-            this.state = new CheckStatus(YELLOW, "Received " + count + " startlevel changes so far");
+            this.state = new Status(YELLOW, "Received " + count + " startlevel changes so far");
         } else if (event.getType() == FrameworkEvent.STARTED) {
-            this.state = new CheckStatus(GREEN, FRAMEWORK_STARTED);
+            this.state = new Status(GREEN, FRAMEWORK_STARTED);
         } // TODO: RED on timeout?
     }
 }

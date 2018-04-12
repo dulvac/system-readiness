@@ -18,38 +18,25 @@
  */
 package org.apache.sling.systemreadiness.core;
 
+/**
+ * Wrapper for storing the name of a check and its {{Status}}
+ */
 public class CheckStatus {
-    public enum State { GREEN, YELLOW, RED;
-        /**
-         * returns {{GREEN}} for {{true}} and {{YELLOW}} for {{false}}
-         */
-        public static State fromBoolean(boolean ready) {
-            return (ready) ? State.GREEN : State.YELLOW;
-        }
-    }
-    
-    private State state;
+    private String checkName;
+    private Status status;
 
-    private String details;
-    
-    public CheckStatus(State state, String details) {
-        this.state = state;
-        this.details = details;
-    }
-    
-    public State getState() {
-        return state;
-    }
-    
-    public String getDetails() {
-        return details;
+    public CheckStatus(String checkName, Status status) {
+        this.checkName = checkName;
+        this.status = status;
     }
 
-    @Override
-    public String toString() {
-        return "CheckStatus{" +
-                "state=" + state +
-                ", details='" + details + '\'' +
-                '}';
+    public String getCheckName() {
+        return checkName;
     }
+
+    public Status getStatus() {
+        return status;
+    }
+
+
 }

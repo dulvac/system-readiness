@@ -25,8 +25,8 @@ import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
 
 import javax.inject.Inject;
 
-import org.apache.sling.systemreadiness.core.CheckStatus;
-import org.apache.sling.systemreadiness.core.CheckStatus.State;
+import org.apache.sling.systemreadiness.core.Status;
+import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,11 +54,11 @@ public class ServicesCheckTest extends BaseTest {
 
     @Test
     public void test() {
-        CheckStatus status = check.getStatus();
+        Status status = check.getStatus();
         assertThat(status.getState(),  is(State.YELLOW));
         assertThat(status.getDetails(), equalTo("Missing service without matching component: java.lang.Runnable"));
         context.registerService(Runnable.class, () -> {}, null);
-        CheckStatus status2 = check.getStatus();
+        Status status2 = check.getStatus();
         assertThat(status2.getState(),  is(State.GREEN));
         assertThat(status2.getDetails(), equalTo(""));
     }
