@@ -118,18 +118,12 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
         }
 
         Status.State prevState = systemState.get().getState();
-
-        // get statuses
         List<CheckStatus> statuses = evaluateAllChecks();
-        
         Status.State currState = State.worstOf(statuses.stream().map(status -> status.getStatus().getState()));
-
         this.systemState.set(new SystemStatus(currState, statuses));
-        if (currState == prevState) {
-            return;
+        if (currState != prevState) {
+            manageMarkerService(currState);
         }
-
-        manageMarkerService(currState);
     }
 
     private List<CheckStatus> evaluateAllChecks() {

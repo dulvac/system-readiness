@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.apache.sling.systemreadiness.core.SystemStatus;
 import org.osgi.framework.BundleContext;
@@ -43,7 +42,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 @Component(
         name = "SystemReadinessServlet",
