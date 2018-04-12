@@ -37,14 +37,14 @@ import org.ops4j.pax.exam.util.Filter;
 public class FrameworkStartTest extends BaseTest {
 
     @Inject
-    @Filter("(component.name=OsgiInstallerCheck)")
+    @Filter("(component.name=FrameworkStartCheck)")
     SystemReadinessCheck check;
 
     @Configuration
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
-                newConfiguration("OsgiInstallerCheck")
+                newConfiguration("FrameworkStartCheck")
                         .asOption()
         };
     }

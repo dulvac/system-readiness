@@ -29,7 +29,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -62,7 +61,7 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     public @interface Config {
 
         @AttributeDefinition(name = "Update frequency",
-                description = "Number of milliseconds between subsequents updates from all the checks")
+                description = "Number of milliseconds between subsequents updates of all the checks")
         long frequency() default 5000;
 
     }
