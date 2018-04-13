@@ -20,7 +20,6 @@ package org.apache.sling.systemreadiness.core.impl;
 
 import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
 import static org.apache.sling.systemreadiness.core.Status.State.RED;
-import static org.apache.sling.systemreadiness.core.Status.State.YELLOW;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,7 +37,6 @@ import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.apache.sling.systemreadiness.core.SystemReady;
 import org.apache.sling.systemreadiness.core.SystemStatus;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -116,13 +114,6 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     }
 
     private void check() {
-        // If there is no {{FrameworkStartCheck}}, only do the actual checks once the framework is started
-        if ((checks.stream().noneMatch(c -> c.getClass().equals(FrameworkStartCheck.class)))
-                && context.getBundle(0).getState() != Bundle.ACTIVE) {
-            systemState.set(new SystemStatus(YELLOW, Collections.emptyList()));
-            return;
-        }
-
         Status.State prevState = systemState.get().getState();
         List<CheckStatus> statuses = evaluateAllChecks();
         Status.State currState = State.worstOf(statuses.stream().map(status -> status.getStatus().getState()));

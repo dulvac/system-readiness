@@ -20,16 +20,13 @@ package org.apache.sling.systemreadiness.core.osgi;
 
 import static org.ops4j.pax.exam.CoreOptions.bundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 import javax.inject.Inject;
 
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.osgi.framework.BundleContext;
 
 public class BaseTest {
@@ -40,6 +37,12 @@ public class BaseTest {
         return CoreOptions.composite(
                 systemProperty("pax.exam.invoker").value("junit"),
                 systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
+                systemProperty("logback.configurationFile")
+                    .value("src/test/resources/logback.xml"),
+                mavenBundle().groupId("org.slf4j").artifactId("slf4j-api").version("1.7.6"),
+                mavenBundle().groupId("ch.qos.logback").artifactId("logback-core").version("1.0.13"),
+                mavenBundle().groupId("ch.qos.logback").artifactId("logback-classic").version("1.0.13"),
+                
                 bundle("link:classpath:META-INF/links/org.ops4j.pax.tipi.junit.link"),
                 bundle("link:classpath:META-INF/links/org.ops4j.pax.exam.invoker.junit.link"),
                 mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").version("1.3_1"),
@@ -49,6 +52,12 @@ public class BaseTest {
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").version("1.8.16"),
                 bundle("reference:file:target/classes/")
         );
+    }
+    
+    public Option servicesCheckConfig(String services) {
+        return newConfiguration("ServicesCheck")
+                .put("services.list", services)
+                .asOption();
     }
     
     public Option monitorConfig() {

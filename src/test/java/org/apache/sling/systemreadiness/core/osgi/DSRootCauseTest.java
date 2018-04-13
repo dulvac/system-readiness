@@ -18,8 +18,10 @@
  */
 package org.apache.sling.systemreadiness.core.osgi;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 import java.util.Optional;
@@ -30,10 +32,12 @@ import org.apache.sling.systemreadiness.core.osgi.examples.CompWithCyclicRef;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingConfig;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingRef;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingRef2;
+import org.apache.sling.systemreadiness.core.osgi.examples.CompWithoutService;
 import org.apache.sling.systemreadiness.rootcause.DSComp;
 import org.apache.sling.systemreadiness.rootcause.DSRef;
 import org.apache.sling.systemreadiness.rootcause.DSRootCause;
 import org.apache.sling.systemreadiness.rootcause.RootCausePrinter;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -51,7 +55,6 @@ public class DSRootCauseTest extends BaseTest {
     @Inject
     ServiceComponentRuntime scr;
     
-    @Inject
     DSRootCause dsRootCause;
     
     @Configuration
@@ -63,8 +66,14 @@ public class DSRootCauseTest extends BaseTest {
                         .add(CompWithMissingRef.class)
                         .add(CompWithCyclicRef.class)
                         .add(CompWithMissingRef2.class)
+                        .add(CompWithoutService.class)
                         )
         };
+    }
+    
+    @Before
+    public void before() {
+        dsRootCause = new DSRootCause(scr);
     }
 
     
@@ -101,6 +110,14 @@ public class DSRootCauseTest extends BaseTest {
         DSComp candidate = unsatisfied.candidates.iterator().next();
         assertEquals("CompWithMissingRef", candidate.desc.name);
         assertNull(candidate.config);
+    }
+    
+    @Test
+    public void testNoService() throws InterruptedException {
+        ComponentDescriptionDTO desc = getComponentDesc(CompWithoutService.class);
+        DSComp rootCause = dsRootCause.getRootCause(desc);
+        assertThat(rootCause.desc.serviceInterfaces.length, equalTo(0)); 
+        new RootCausePrinter().print(rootCause);
     }
     
     @Test(expected = IllegalStateException.class)

@@ -20,6 +20,7 @@ package org.apache.sling.systemreadiness.core.impl;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,65 +44,55 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @Component(
-        name = "ServicesCheck",
+        name = "ComponentsCheck",
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd=ServicesCheck.Config.class)
-public class ServicesCheck implements SystemReadinessCheck {
+@Designate(ocd=ComponentsCheck.Config.class)
+public class ComponentsCheck implements SystemReadinessCheck {
 
     @ObjectClassDefinition(
-            name="Services Registered System Readiness Check",
-            description="System readiness check that waits for a list of services to be registered"
+            name="DS Components System Readiness Check",
+            description="System readiness check that checks a list of DS components"
+                + "and provides root cause analysis in case of errors"
     )
     public @interface Config {
 
-        @AttributeDefinition(name = "Services list", description = "The services that need to be registered for the check to pass")
-        String services_list();
+        @AttributeDefinition(name = "Components list", description = "The components that need to come up before this check reports GREEN")
+        String components_list();
 
     }
 
-    private List<String> servicesList;
-
-    private Map<String, Tracker> trackers;
+    private List<String> componentsList;
     
     DSRootCause analyzer;
 
     @Reference
-    private ServiceComponentRuntime scr;
+    ServiceComponentRuntime scr;
 
     @Activate
     public void activate(final BundleContext ctx, final Config config) throws InterruptedException {
-        analyzer = new DSRootCause(scr);
-        trackers = new HashMap<>();
-        servicesList = StringPlus.normalize(config.services_list());
-        for (String serviceName : servicesList) {
-            Tracker tracker = new Tracker(ctx, serviceName);
-            trackers.put(serviceName, tracker); 
-        }
+        this.analyzer = new DSRootCause(scr);
+        componentsList = StringPlus.normalize(config.components_list());
     }
 
     @Deactivate
     protected void deactivate() {
-        trackers.values().stream().forEach(tracker -> tracker.close());
-        trackers.clear();
     }
 
 
     @Override
     public String getName() {
-        return "Services Check";
+        return "Components Check";
     }
 
     @Override
     public Status getStatus() {
-        boolean allPresent = trackers.values().stream().allMatch(tracker -> tracker.present());
-        // TODO: RED on timeouts
-        final Status.State state = allPresent ? State.GREEN : State.YELLOW;
-        return new Status(state, getDetails()); // TODO: out of sync? do we care?
+        final Status.State state = State.GREEN;
+        return new Status(state, getDetails());
     }
 
     private String getDetails() {
-        List<String> missing = getMissing();
+        List<String> missing = Collections.emptyList();
         StringBuilder missingSt = new StringBuilder();
         RootCausePrinter printer = new RootCausePrinter(st -> missingSt.append(st + "\n"));
         for (String iface : missing) {
@@ -113,14 +104,6 @@ public class ServicesCheck implements SystemReadinessCheck {
             }
         }
         return missingSt.toString();
-    }
-
-    private List<String> getMissing() {
-        List<String> missing = trackers.entrySet().stream()
-                .filter(entry -> !entry.getValue().present())
-                .map(entry -> entry.getKey())
-                .collect(toList());
-        return missing;
     }
 
 }

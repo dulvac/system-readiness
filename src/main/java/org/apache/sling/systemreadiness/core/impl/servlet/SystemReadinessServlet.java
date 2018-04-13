@@ -47,7 +47,8 @@ import org.slf4j.LoggerFactory;
         name = "SystemReadinessServlet",
         service = Servlet.class,
         property = {
-                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=" + "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "org.osgi.service.http" + ")",
+                // TODO context select does not work in karaf
+                //HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=" + "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "org.osgi.service.http" + ")",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=" + "/system/console/ready",
         }
 )

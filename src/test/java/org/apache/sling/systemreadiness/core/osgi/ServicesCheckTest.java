@@ -18,10 +18,10 @@
  */
 package org.apache.sling.systemreadiness.core.osgi;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
 
 import javax.inject.Inject;
 
@@ -34,6 +34,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.Filter;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
 
 @RunWith(PaxExam.class)
 public class ServicesCheckTest extends BaseTest {
@@ -46,9 +47,7 @@ public class ServicesCheckTest extends BaseTest {
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
-                newConfiguration("ServicesCheck")
-                        .put("services.list", Runnable.class.getName())
-                        .asOption()
+                servicesCheckConfig(Runnable.class.getName() + "," + ServiceComponentRuntime.class.getName()),
         };
     }
 
@@ -56,9 +55,10 @@ public class ServicesCheckTest extends BaseTest {
     public void test() {
         Status status = check.getStatus();
         assertThat(status.getState(),  is(State.YELLOW));
-        assertThat(status.getDetails(), equalTo("Missing service without matching DS component: java.lang.Runnable"));
+        assertThat(status.getDetails(), containsString("Missing service without matching DS component: java.lang.Runnable"));
         context.registerService(Runnable.class, () -> {}, null);
         Status status2 = check.getStatus();
+        System.out.println(status2);
         assertThat(status2.getState(),  is(State.GREEN));
         assertThat(status2.getDetails(), equalTo(""));
     }

@@ -20,8 +20,7 @@ QA
 * Starting system tests as soon as a system is ready for the tests to proceed
 * Determining the root cause why an OSGi based system does not start up
 
-Deployment / Upgrades
-* Signaling when a deployment or upgrade step finished and the next step can begin
+Deployment
 * Signaling when a system is ready after an upgrade and can receive traffic in case of blue / green deployments
 
 Production

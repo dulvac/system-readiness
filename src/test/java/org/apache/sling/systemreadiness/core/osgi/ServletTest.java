@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,10 +31,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.awaitility.Awaitility;
 import org.junit.Test;
@@ -55,9 +56,7 @@ public class ServletTest extends BaseTest {
                 baseConfiguration(),
                 httpService(),
                 monitorConfig(),
-                newConfiguration("ServicesCheck")
-                    .put("services.list", Runnable.class.getName())
-                    .asOption()
+                servicesCheckConfig(Runnable.class.getName())
         };
     }
 

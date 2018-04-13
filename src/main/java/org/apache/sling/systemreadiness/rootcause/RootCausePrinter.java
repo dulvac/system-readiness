@@ -40,7 +40,7 @@ public class RootCausePrinter {
         if (comp.config == null && "require".equals(comp.desc.configurationPolicy)) {
             println(level, "Component %s missing config on pid %s", comp.desc.name, Arrays.asList(comp.desc.configurationPid));
         } else {
-            println(level, "Component %s unsatisfied references", comp.desc.name);
+            println(level, "Component %s%s", comp.desc.name, comp.unsatisfied.isEmpty() ? " statisfied" : " unsatisfied references");
         }
         int l2 = level + 2;
         int l3 = l2 + 2;

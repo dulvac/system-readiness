@@ -19,11 +19,8 @@
 package org.apache.sling.systemreadiness.core.impl.servlet;
 
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.sling.systemreadiness.core.CheckStatus;
-import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemStatus;
 
 public class StatusWriterJson {

@@ -24,20 +24,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.component.runtime.dto.ReferenceDTO;
 import org.osgi.service.component.runtime.dto.UnsatisfiedReferenceDTO;
 
-@Component(service=DSRootCause.class)
 public class DSRootCause {
 
     private static final int MAX_RECURSION = 10;
-    @Reference
+    
     private ServiceComponentRuntime scr;
+    
+    public DSRootCause(ServiceComponentRuntime scr) {
+        this.scr = scr;
+    }
     
     public Optional<DSComp> getRootCause(String iface) {
         return scr.getComponentDescriptionDTOs().stream()
