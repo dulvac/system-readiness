@@ -24,7 +24,6 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
 
 import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
@@ -56,9 +55,7 @@ public class SystemReadinessMonitorTest extends BaseTest {
     public Option[] configuration() throws MalformedURLException {
         return new Option[] {
                 baseConfiguration(),
-                newConfiguration("SystemReadinessMonitor")
-                        .put("frequency", 50)
-                        .asOption()
+                monitorConfig()
         };
     }
 

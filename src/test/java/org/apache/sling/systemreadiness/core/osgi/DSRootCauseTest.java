@@ -18,7 +18,6 @@
  */
 package org.apache.sling.systemreadiness.core.osgi;
 
-import static org.apache.sling.systemreadiness.core.osgi.BndDSOptions.dsBundle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
@@ -59,7 +58,7 @@ public class DSRootCauseTest extends BaseTest {
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
-                dsBundle("test", bundle()
+                BndDSOptions.dsBundle("test", bundle()
                         .add(CompWithMissingConfig.class)
                         .add(CompWithMissingRef.class)
                         .add(CompWithCyclicRef.class)

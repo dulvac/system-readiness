@@ -56,7 +56,7 @@ public class ServicesCheckTest extends BaseTest {
     public void test() {
         Status status = check.getStatus();
         assertThat(status.getState(),  is(State.YELLOW));
-        assertThat(status.getDetails(), equalTo("Missing service without matching component: java.lang.Runnable"));
+        assertThat(status.getDetails(), equalTo("Missing service without matching DS component: java.lang.Runnable"));
         context.registerService(Runnable.class, () -> {}, null);
         Status status2 = check.getStatus();
         assertThat(status2.getState(),  is(State.GREEN));

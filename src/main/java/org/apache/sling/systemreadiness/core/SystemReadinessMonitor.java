@@ -19,10 +19,17 @@
 package org.apache.sling.systemreadiness.core;
 
 /**
- * Checks that all registered checks report ready
- * TODO
+ * Checks that all registered readiness and builds an aggregated state of the system.
+ * The aggregated state is the worst state of all checks.
  */
 public interface SystemReadinessMonitor  {
+    /**
+     * @return true if aggregated state is GREEN
+     */
     boolean isReady();
+    
+    /**
+     * @return detailed system state
+     */
     SystemStatus getStatus();
 }

@@ -20,12 +20,16 @@ package org.apache.sling.systemreadiness.core.osgi;
 
 import static org.ops4j.pax.exam.CoreOptions.bundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 import javax.inject.Inject;
 
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.osgi.framework.BundleContext;
 
 public class BaseTest {
@@ -46,4 +50,18 @@ public class BaseTest {
                 bundle("reference:file:target/classes/")
         );
     }
+    
+    public Option monitorConfig() {
+        return newConfiguration("SystemReadinessMonitor")
+                .put("poll.interval", 50)
+                .asOption();
+    }
+    
+    public Option httpService() {
+        return CoreOptions.composite(
+                mavenBundle("org.apache.felix", "org.apache.felix.http.servlet-api", "1.1.2"),
+                mavenBundle("org.apache.felix", "org.apache.felix.http.jetty", "3.4.8")
+                );
+    }
+
 }

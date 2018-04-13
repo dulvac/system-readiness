@@ -19,10 +19,10 @@
 package org.apache.sling.systemreadiness.core;
 
 /**
- * Readiness check services provide custom logic for signalling
+ * Readiness check services provide custom logic for signaling
  * that particular criteria are met for when an instance is considered "ready".
  *
- * Examples: An asyncronous integration with another instance or a third-party service
+ * Examples: An asynchronous integration with another instance or a third-party service
  *
  * {@see SystemReadinessMonitor}
  *

@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
 
 import java.io.BufferedReader;
@@ -54,11 +53,8 @@ public class ServletTest extends BaseTest {
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
-                mavenBundle("org.apache.felix", "org.apache.felix.http.servlet-api", "1.1.2"),
-                mavenBundle("org.apache.felix", "org.apache.felix.http.jetty", "3.4.8"),
-                newConfiguration("SystemReadinessMonitor")
-                    .put("frequency", 50)
-                    .asOption(),
+                httpService(),
+                monitorConfig(),
                 newConfiguration("ServicesCheck")
                     .put("services.list", Runnable.class.getName())
                     .asOption()

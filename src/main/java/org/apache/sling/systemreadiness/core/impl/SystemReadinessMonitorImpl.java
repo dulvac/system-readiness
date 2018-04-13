@@ -22,16 +22,22 @@ import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
 import static org.apache.sling.systemreadiness.core.Status.State.RED;
 import static org.apache.sling.systemreadiness.core.Status.State.YELLOW;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.apache.sling.systemreadiness.core.*;
+import org.apache.sling.systemreadiness.core.CheckStatus;
+import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.Status.State;
+import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
+import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
+import org.apache.sling.systemreadiness.core.SystemReady;
+import org.apache.sling.systemreadiness.core.SystemStatus;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -59,9 +65,9 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     )
     public @interface Config {
 
-        @AttributeDefinition(name = "Update frequency",
+        @AttributeDefinition(name = "Poll interval",
                 description = "Number of milliseconds between subsequents updates of all the checks")
-        long frequency() default 5000;
+        long poll_interval() default 5000;
 
     }
 
@@ -84,7 +90,7 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
         this.context = context;
         this.systemState = new AtomicReference<>(new SystemStatus(State.YELLOW, Collections.emptyList()));
         this.executor = Executors.newSingleThreadScheduledExecutor();
-        this.executor.scheduleAtFixedRate(this::check, 0, config.frequency(), TimeUnit.MILLISECONDS);
+        this.executor.scheduleAtFixedRate(this::check, 0, config.poll_interval(), TimeUnit.MILLISECONDS);
         log.info("Activated");
     }
 

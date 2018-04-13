@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.sling.systemreadiness.core.Status;
+import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.rootcause.DSComp;
 import org.apache.sling.systemreadiness.rootcause.DSRootCause;
@@ -61,6 +62,9 @@ public class ServicesCheck implements SystemReadinessCheck {
 
     private Map<String, Tracker> trackers;
     
+    /**
+     * Will only be preset if DS Runtime is available
+     */
     @Reference(cardinality=ReferenceCardinality.OPTIONAL)
     DSRootCause analyzer;
 
@@ -87,8 +91,9 @@ public class ServicesCheck implements SystemReadinessCheck {
 
     @Override
     public Status getStatus() {
+        boolean allPresent = trackers.values().stream().allMatch(tracker -> tracker.present());
         // TODO: RED on timeouts
-        final Status.State state = Status.State.fromBoolean(trackers.values().stream().allMatch(tracker -> tracker.present()));
+        final Status.State state = allPresent ? State.GREEN : State.YELLOW;
         return new Status(state, getDetails()); // TODO: out of sync? do we care?
     }
 
@@ -102,7 +107,7 @@ public class ServicesCheck implements SystemReadinessCheck {
                 if (rootCause.isPresent()) {
                     printer.print(rootCause.get());
                 } else {
-                    missingSt.append("Missing service without matching component: " + iface);
+                    missingSt.append("Missing service without matching DS component: " + iface);
                 }
             }
             return missingSt.toString();
