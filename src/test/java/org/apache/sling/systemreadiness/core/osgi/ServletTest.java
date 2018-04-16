@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 
 @RunWith(PaxExam.class)
 public class ServletTest extends BaseTest {
+    public static final String SERVLET_PATH = "/servlet/path";
     @Inject
     SystemReadinessMonitor monitor;
 
@@ -52,6 +54,7 @@ public class ServletTest extends BaseTest {
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
+                servletConfig(SERVLET_PATH),
                 httpService(),
                 monitorConfig(),
                 servicesCheckConfig(Runnable.class.getName())
@@ -62,15 +65,19 @@ public class ServletTest extends BaseTest {
     public void test() throws IOException, InterruptedException {
         Awaitility.pollInSameThread();
         Awaitility.await().until(monitor::isReady, is(false));
-        String content = Awaitility.await().until(() -> readFromUrl("http://localhost:8080/system/console/ready", 503), notNullValue());
+        String content = Awaitility.await().until(() -> readFromUrl(getUrl(SERVLET_PATH), 503), notNullValue());
         System.out.println(content);
         assertThat(content, containsString("\"systemStatus\": \"YELLOW\""));
         context.registerService(Runnable.class, () -> {}, null);
         Awaitility.await().until(monitor::isReady, is(true));
-        String content2 = Awaitility.await().until(() -> readFromUrl("http://localhost:8080/system/console/ready", 200), notNullValue());
+        String content2 = Awaitility.await().until(() -> readFromUrl(getUrl(SERVLET_PATH), 200), notNullValue());
         assertThat(content2, containsString("\"systemStatus\": \"GREEN\""));
     }
-    
+
+    private String getUrl(String path) {
+        return URI.create("http://localhost:8080").resolve(path).toString();
+    }
+
     private String readFromUrl(String address, int expectedCode) throws MalformedURLException, IOException {
         URL url = new URL(address);   
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();

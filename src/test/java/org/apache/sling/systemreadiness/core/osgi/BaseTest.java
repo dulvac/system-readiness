@@ -73,4 +73,10 @@ public class BaseTest {
                 );
     }
 
+    public Option servletConfig(String path) {
+        return newConfiguration("SystemReadinessServlet")
+                .put("osgi.http.whiteboard.servlet.pattern", path)
+                .asOption();
+    }
+
 }
