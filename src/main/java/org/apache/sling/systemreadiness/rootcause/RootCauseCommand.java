@@ -17,14 +17,11 @@ public class RootCauseCommand {
     @Reference
     ServiceComponentRuntime scr;
     
-    @Reference
-    DSRootCause dsRootCause;
-
     public DSComp rootcause(String componentName) {
         ComponentDescriptionDTO cdesc = scr.getComponentDescriptionDTOs().stream()
             .filter(desc -> desc.name.equals(componentName))
             .findFirst().get();
-        DSComp rootCause = dsRootCause.getRootCause(cdesc);
+        DSComp rootCause = new DSRootCause(scr).getRootCause(cdesc);
         new RootCausePrinter().print(rootCause);
         return rootCause;
     }
