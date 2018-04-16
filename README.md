@@ -16,18 +16,18 @@ One typical error is that a DS component does not come up because some mandatory
 
 Typical use cases for the system readiness check ordered by the phase of the development cycle.
 
-Development
+### Development
 * Coarse check of a pax exam based setup before letting the actual junit tests work on the system
 * Determining the root cause of a pax exam based setup not starting
 
-QA
+### QA
 * Starting system tests as soon as a system is ready for the tests to proceed
 * Determining the root cause for an OSGi based system not starting up
 
-Deployment
+### Deployment
 * Signaling when a system is ready after an upgrade so that it can receive traffic in the case of blue / green deployments
 
-Production
+### Production
 * Periodic _Readiness health checks_ for system and signaling this state to monitoring systems
 * Container automation and driving _autopilot container_ deployments.
 
