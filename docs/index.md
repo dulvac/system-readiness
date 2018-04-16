@@ -70,7 +70,7 @@ Component CompWithMissingRef2 unsatisfied references
         Component CompWithMissingConfig missing config on pid [CompWithMissingConfig]
 ```
 
-## Example of using the readyness service framework in Apache Karaf
+## Example of using the syastem readiness service framework in Apache Karaf
 
 Download, install and run Apache Karaf 4.1.x. Inside the karaf shell execute this:
 
