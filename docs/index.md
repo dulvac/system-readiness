@@ -1,15 +1,17 @@
 # Reference Documentation
 
+This project provides a framework to configure and create so called system checks and signal the readiness of an OSGi based system.
+
 ## Requirements:
 
-* Configuration Admin
+* Configuration Admin Service
 * Service Component Runtime
 
 See below for a hands on example in Apache Karaf.
 
 ## Services Check
 
-Readyness check that is shipped in the core bundle and checks for the presence of listed services by interface name or filter.
+Readiness check that is shipped in the core bundle and checks for the presence of listed services by interface name or filter.
 
 Mandatory configuration with pid: `ServicesCheck`
 
@@ -24,7 +26,7 @@ In the details the check reports all missing services. If a service is backed by
 Implement the org.apache.sling.systemreadiness.core.SystemReadinessCheck interface and register
 your instance as a service. The SystemReadinessMonitor will pick up your service automatically.
 
-Your service should avoid references to other services that come up late as a late appearing check could
+Your service should avoid references to other services that come up late, as a late appearing check could
 make the aggregated state oscilate during startup. One option to avoid this is to refer to a late service using an optional dependency and return a YELLOW state until it is up.
 
 ## System Readiness Monitor service
@@ -37,7 +39,36 @@ For an example see the [test case](../src/test/java/org/apache/sling/systemreadi
 
 ## Readiness servlet
 
+The Readiness servlet provides the aggregated state of the system over http in json format.
+It is registered on the path `/system/console/ready`.
 
+This is an example of a ready system with just the services check.
+```
+{
+  "systemStatus": "GREEN", 
+  "checks": [
+    { "check": "Services Check", "status": "GREEN", "details": "" }, 
+  ]
+}
+```
+
+## Root cause command
+
+For quickly checking for a root cause of a problem with a declarative services component there is also a handy command.
+
+`rootcause <ds-compoment-name>`
+
+It prints the top level status of a DS component as well as the tree of DS unsatisfied components it depends on together with their status.
+
+This is a sample output from the DSRootCause tests. It shows the cause of a component that depends on some other components. The root cause of CompWithMissingRef2 not being satisfied is that CompWithMissingConfig is missing its mandatory config.
+
+```
+Component CompWithMissingRef2 unsatisfied references
+  ref other interface org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingRef 
+    Component CompWithMissingRef unsatisfied references
+      ref other interface org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingConfig 
+        Component CompWithMissingConfig missing config on pid [CompWithMissingConfig]
+```
 
 ## Example of using the readyness service framework in Apache Karaf
 
@@ -51,3 +82,11 @@ install -s mvn:org.apache/org.apache.sling.systemreadiness/0.1.0-SNAPSHOT
 
 Point your browser to http://localhost:8181/system/console/ready .
 
+Check the status of a DS component:
+
+```
+rootcause SystemReadinessMonitor
+ Component SystemReadinessMonitor statisfied
+```
+
+Try this with some of your own components.
