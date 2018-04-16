@@ -1,6 +1,6 @@
 # Reference Documentation
 
-This project provides a framework to configure and create so called system checks and signal the readiness of an OSGi based system.
+This project provides a framework to configure and create so called _system readiness checks_ and report the _readiness_ of an application on top of an OSGi system.
 
 ## Requirements:
 
@@ -70,7 +70,7 @@ Component CompWithMissingRef2 unsatisfied references
         Component CompWithMissingConfig missing config on pid [CompWithMissingConfig]
 ```
 
-## Example of using the syastem readiness service framework in Apache Karaf
+## Example of using the system readiness service framework in Apache Karaf
 
 Download, install and run Apache Karaf 4.1.x. Inside the karaf shell execute this:
 
