@@ -18,9 +18,8 @@
  */
 package org.apache.sling.systemreadiness.core.impl;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.Status.State;
@@ -83,23 +82,27 @@ public class ComponentsCheck implements SystemReadinessCheck {
 
     @Override
     public Status getStatus() {
-        final Status.State state = State.GREEN;
-        return new Status(state, getDetails());
+        StringBuilder details = new StringBuilder();
+        List<DSComp> watchedComps = scr.getComponentDescriptionDTOs().stream()
+            .filter(desc -> componentsList.contains(desc.name))
+            .map(analyzer::getRootCause)
+            .collect(Collectors.toList());
+        if (watchedComps.size() < componentsList.size()) {
+            throw new IllegalStateException("Not all named components could be found");
+        };
+        watchedComps.stream().forEach(dsComp -> addDetails(dsComp, details));
+        final Status.State state = State.worstOf(watchedComps.stream().map(this::status));
+        return new Status(state, details.toString());
+    }
+    
+    private Status.State status(DSComp component) {
+        boolean missingConfig = component.config == null && "require".equals(component.desc.configurationPolicy);
+        return (missingConfig || !component.unsatisfied.isEmpty()) ? State.YELLOW : State.GREEN;
     }
 
-    private String getDetails() {
-        List<String> missing = Collections.emptyList();
-        StringBuilder missingSt = new StringBuilder();
-        RootCausePrinter printer = new RootCausePrinter(st -> missingSt.append(st + "\n"));
-        for (String iface : missing) {
-            Optional<DSComp> rootCause = analyzer.getRootCause(iface);
-            if (rootCause.isPresent()) {
-                printer.print(rootCause.get());
-            } else {
-                missingSt.append("Missing service without matching DS component: " + iface);
-            }
-        }
-        return missingSt.toString();
+    private void addDetails(DSComp component, StringBuilder details) {
+        RootCausePrinter printer = new RootCausePrinter(st -> details.append(st + "\n"));
+        printer.print(component);
     }
 
 }

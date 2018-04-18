@@ -60,6 +60,12 @@ public class BaseTest {
                 .asOption();
     }
     
+    public Option componentsCheckConfig(String components) {
+        return newConfiguration("ComponentsCheck")
+                .put("components.list", components)
+                .asOption();
+    }
+    
     public Option monitorConfig() {
         return newConfiguration("SystemReadinessMonitor")
                 .put("poll.interval", 50)

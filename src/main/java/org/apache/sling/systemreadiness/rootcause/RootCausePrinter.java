@@ -21,6 +21,8 @@ package org.apache.sling.systemreadiness.rootcause;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
+
 public class RootCausePrinter {
     private Consumer<String> printCallback;
     
@@ -39,19 +41,23 @@ public class RootCausePrinter {
     public void print(DSComp comp, int level) {
         if (comp.config == null && "require".equals(comp.desc.configurationPolicy)) {
             println(level, "Component %s missing config on pid %s", comp.desc.name, Arrays.asList(comp.desc.configurationPid));
+        } else if (comp.config != null && comp.config.state == ComponentConfigurationDTO.UNSATISFIED_CONFIGURATION){
+            println(level, "Component %s unsatisifed configuration on pid %s", comp.desc.name, Arrays.asList(comp.desc.configurationPid));
+        } else if (!comp.unsatisfied.isEmpty()) {
+            println(level, "Component %s unsatisfied references", comp.desc.name);
         } else {
-            println(level, "Component %s%s", comp.desc.name, comp.unsatisfied.isEmpty() ? " statisfied" : " unsatisfied references");
+            println(level, "Component %s satisfied", comp.desc.name);
         }
         int l2 = level + 2;
         int l3 = l2 + 2;
-        for ( DSRef ref : comp.unsatisfied) {
-            println(l2, "ref %s interface %s %s", ref.name, ref.iface, getFilterSt(ref.filter));
+        for (DSRef ref : comp.unsatisfied) {
+            println(l2, "unsatisfied ref %s interface %s %s", ref.name, ref.iface, getFilterSt(ref.filter));
             for (DSComp cand : ref.candidates) {
                 print(cand, l3);
             }
         }
     }
-
+ 
     private Object getFilterSt(String filter) {
         return filter == null ? "" : ", filter " + filter;
     }

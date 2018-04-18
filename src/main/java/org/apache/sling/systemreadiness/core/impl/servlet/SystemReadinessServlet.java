@@ -43,12 +43,16 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Provide aggregated readiness information using a servlet
+ * 
+ * In some environments a context select like below will be needed:
+ * osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=org.osgi.service.http)
+ */
 @Component(
         name = "SystemReadinessServlet",
         service = Servlet.class,
         property = {
-                // TODO context select does not work in karaf
-                //HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=" + "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "org.osgi.service.http" + ")",
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=" + "/system/console/ready",
         }
 )
@@ -62,8 +66,11 @@ public class SystemReadinessServlet extends HttpServlet {
     )
     public @interface Config {
 
-        @AttributeDefinition(name = "Servlet Path", description = "The servlet path")
+        @AttributeDefinition(name = "Servlet Path")
         String osgi_http_whiteboard_servlet_pattern() default SystemReadinessServlet.DEFAULT_PATH;
+        
+        @AttributeDefinition(name = "Servlet Context")
+        String osgi_http_whiteboard_context_select();
 
     }
 
@@ -77,7 +84,6 @@ public class SystemReadinessServlet extends HttpServlet {
     @Activate
     protected void activate(final BundleContext ctx, final Map<String, Object> properties, final Config config) {
         final String path = config.osgi_http_whiteboard_servlet_pattern();
-        // TODO: configurable path
         LOG.info("Registered servlet to listen on {}", path);
     }
 
@@ -88,11 +94,10 @@ public class SystemReadinessServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         SystemStatus systemState = this.monitor.getStatus();
-        PrintWriter writer = response.getWriter();
-        
         if (! (systemState.getState() == GREEN)) {
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
+        PrintWriter writer = response.getWriter();
         new StatusWriterJson(writer).write(systemState);
     }
 
