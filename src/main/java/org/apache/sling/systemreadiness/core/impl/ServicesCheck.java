@@ -39,8 +39,6 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import javax.sound.midi.Track;
-
 @Component(
         name = "ServicesCheck",
         configurationPolicy = ConfigurationPolicy.REQUIRE
