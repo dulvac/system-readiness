@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
+import org.apache.sling.systemreadiness.core.osgi.util.BaseTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -47,7 +48,7 @@ public class ServicesCheckTest extends BaseTest {
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
-                servicesCheckConfig(Runnable.class.getName() + "," + ServiceComponentRuntime.class.getName()),
+                servicesCheckConfig(Runnable.class.getName(), ServiceComponentRuntime.class.getName()),
         };
     }
 

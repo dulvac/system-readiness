@@ -31,6 +31,9 @@ import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.Status.State;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithoutService;
+import org.apache.sling.systemreadiness.core.osgi.examples.CompWithoutService2;
+import org.apache.sling.systemreadiness.core.osgi.util.BaseTest;
+import org.apache.sling.systemreadiness.core.osgi.util.BndDSOptions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -53,9 +56,10 @@ public class ComponentsCheckTest extends BaseTest {
     public Option[] configuration() {
         return new Option[] {
                 baseConfiguration(),
-                componentsCheckConfig("CompWithoutService"),
+                componentsCheckConfig("CompWithoutService", "CompWithoutService2"),
                 BndDSOptions.dsBundle("test", bundle()
                         .add(CompWithoutService.class)
+                        .add(CompWithoutService2.class)
                         )
         };
     }

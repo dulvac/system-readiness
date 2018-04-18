@@ -33,6 +33,8 @@ import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingConfig
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingRef;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithMissingRef2;
 import org.apache.sling.systemreadiness.core.osgi.examples.CompWithoutService;
+import org.apache.sling.systemreadiness.core.osgi.util.BaseTest;
+import org.apache.sling.systemreadiness.core.osgi.util.BndDSOptions;
 import org.apache.sling.systemreadiness.rootcause.DSComp;
 import org.apache.sling.systemreadiness.rootcause.DSRef;
 import org.apache.sling.systemreadiness.rootcause.DSRootCause;

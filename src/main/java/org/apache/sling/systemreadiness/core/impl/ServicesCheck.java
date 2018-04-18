@@ -20,10 +20,7 @@ package org.apache.sling.systemreadiness.core.impl;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.apache.sling.systemreadiness.core.Status;
 import org.apache.sling.systemreadiness.core.Status.State;
@@ -42,6 +39,8 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import javax.sound.midi.Track;
+
 @Component(
         name = "ServicesCheck",
         configurationPolicy = ConfigurationPolicy.REQUIRE
@@ -56,7 +55,7 @@ public class ServicesCheck implements SystemReadinessCheck {
     public @interface Config {
 
         @AttributeDefinition(name = "Services list", description = "The services that need to be registered for the check to pass")
-        String services_list();
+        String[] services_list();
 
     }
 
@@ -73,7 +72,7 @@ public class ServicesCheck implements SystemReadinessCheck {
     public void activate(final BundleContext ctx, final Config config) throws InterruptedException {
         analyzer = new DSRootCause(scr);
         trackers = new HashMap<>();
-        servicesList = StringPlus.normalize(config.services_list());
+        servicesList = Arrays.asList(config.services_list());
         for (String serviceName : servicesList) {
             Tracker tracker = new Tracker(ctx, serviceName);
             trackers.put(serviceName, tracker); 
@@ -82,7 +81,7 @@ public class ServicesCheck implements SystemReadinessCheck {
 
     @Deactivate
     protected void deactivate() {
-        trackers.values().stream().forEach(tracker -> tracker.close());
+        trackers.values().stream().forEach(Tracker::close);
         trackers.clear();
     }
 
@@ -94,9 +93,9 @@ public class ServicesCheck implements SystemReadinessCheck {
 
     @Override
     public Status getStatus() {
-        boolean allPresent = trackers.values().stream().allMatch(tracker -> tracker.present());
+        boolean allPresent = trackers.values().stream().allMatch(Tracker::present);
         // TODO: RED on timeouts
-        final Status.State state = allPresent ? State.GREEN : State.YELLOW;
+        final Status.State state = State.fromBoolean(allPresent);
         return new Status(state, getDetails()); // TODO: out of sync? do we care?
     }
 

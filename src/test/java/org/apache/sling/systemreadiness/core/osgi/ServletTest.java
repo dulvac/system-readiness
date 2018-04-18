@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
+import org.apache.sling.systemreadiness.core.osgi.util.BaseTest;
 import org.awaitility.Awaitility;
 import org.junit.Test;
 import org.junit.runner.RunWith;

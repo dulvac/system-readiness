@@ -37,7 +37,7 @@ class Tracker implements Closeable {
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException("Error creating filter for " + nameOrFilter);
         }
-        this.stracker = new ServiceTracker<Object, Object>(context, filter, null);
+        this.stracker = new ServiceTracker<>(context, filter, null);
         this.stracker.open();
     }
     

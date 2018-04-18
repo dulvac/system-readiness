@@ -34,6 +34,7 @@ import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.apache.sling.systemreadiness.core.osgi.examples.TestSystemReadinessCheck;
+import org.apache.sling.systemreadiness.core.osgi.util.BaseTest;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
 import org.junit.Test;

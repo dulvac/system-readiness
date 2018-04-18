@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.systemreadiness.core.osgi;
+package org.apache.sling.systemreadiness.core.osgi.util;
 
 import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
@@ -25,7 +25,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.tinybundles.core.TinyBundle;
 
 /**
- * This must be in its own bundle and static to avoid that TinyBunldes has to be deployed in OSGi
+ * This must be in its own bundle and static to avoid that TinyBundles has to be deployed in OSGi
  */
 public class BndDSOptions {
 

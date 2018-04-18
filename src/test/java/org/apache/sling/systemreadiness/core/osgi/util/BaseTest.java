@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.systemreadiness.core.osgi;
+package org.apache.sling.systemreadiness.core.osgi.util;
 
 import static org.ops4j.pax.exam.CoreOptions.bundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -29,9 +29,11 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.osgi.framework.BundleContext;
 
+import java.util.List;
+
 public class BaseTest {
     @Inject
-    BundleContext context;
+    public BundleContext context;
 
     public Option baseConfiguration() {
         return CoreOptions.composite(
@@ -54,13 +56,13 @@ public class BaseTest {
         );
     }
     
-    public Option servicesCheckConfig(String services) {
+    public Option servicesCheckConfig(String... services) {
         return newConfiguration("ServicesCheck")
                 .put("services.list", services)
                 .asOption();
     }
     
-    public Option componentsCheckConfig(String components) {
+    public Option componentsCheckConfig(String... components) {
         return newConfiguration("ComponentsCheck")
                 .put("components.list", components)
                 .asOption();

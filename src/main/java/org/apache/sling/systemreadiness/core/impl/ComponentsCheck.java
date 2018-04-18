@@ -18,6 +18,7 @@
  */
 package org.apache.sling.systemreadiness.core.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +54,7 @@ public class ComponentsCheck implements SystemReadinessCheck {
     public @interface Config {
 
         @AttributeDefinition(name = "Components list", description = "The components that need to come up before this check reports GREEN")
-        String components_list();
+        String[] components_list();
 
     }
 
@@ -67,7 +68,7 @@ public class ComponentsCheck implements SystemReadinessCheck {
     @Activate
     public void activate(final BundleContext ctx, final Config config) throws InterruptedException {
         this.analyzer = new DSRootCause(scr);
-        componentsList = StringPlus.normalize(config.components_list());
+        componentsList = Arrays.asList(config.components_list());
     }
 
     @Deactivate
