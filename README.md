@@ -4,7 +4,7 @@ In OSGi there is always the question of when a system is fully operational after
 
 ## Usage
 
-See [reference documentation](docs/index.md).
+See [reference documentation](docs/README.md).
 
 ## Error reporting and root cause analysis
 
