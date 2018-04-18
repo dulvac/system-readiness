@@ -21,6 +21,17 @@ The check reports GREEN when all services are currently present and YELLOW if at
 
 In the details the check reports all missing services. If a service is backed by a DS component then automatically a root cause analysis is executed. If such a service is missing then unresolved references are shown in a tree with detailed information about each component. At the leafs of the tree the root causes can be found.
 
+## Component Check
+
+Readiness check that is shipped in the core bundle and checks for the presence of listed DS components by name.
+
+Mandatory configuration with pid: `ComponentsCheck`
+
+* `components.list=<List of component names to check>`
+
+The check reports GREEN when all components are satisfied. It also provides root cause analysis.
+The main difference to th Service Check is that the checked component does not need to offer an OSGi service.
+
 ## Providing additional custom checks
 
 Implement the org.apache.sling.systemreadiness.core.SystemReadinessCheck interface and register
