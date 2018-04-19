@@ -88,6 +88,7 @@ Download, install and run Apache Karaf 4.1.x. Inside the karaf shell execute thi
 ```
 feature:install scr http-whiteboard
 config:property-set --pid ServicesCheck services.list org.osgi.service.log.LogService
+config:property-set --pid SystemReadinessServlet osgi.http.whiteboard.context.select "(osgi.http.whiteboard.context.name=default)"
 install -s mvn:org.apache/org.apache.sling.systemreadiness/0.1.0-SNAPSHOT
 ```
 

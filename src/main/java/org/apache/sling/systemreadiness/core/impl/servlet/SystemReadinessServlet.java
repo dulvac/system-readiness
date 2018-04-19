@@ -45,15 +45,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provide aggregated readiness information using a servlet
- * 
- * In some environments a context select like below will be needed:
- * osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=org.osgi.service.http)
  */
 @Component(
         name = "SystemReadinessServlet",
         service = Servlet.class,
         property = {
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN + "=" + "/system/console/ready",
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=" + "(osgi.http.whiteboard.context.name=org.osgi.service.http)"
         }
 )
 @Designate(ocd=SystemReadinessServlet.Config.class)
