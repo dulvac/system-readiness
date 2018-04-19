@@ -20,10 +20,9 @@ package org.apache.sling.systemreadiness.core.impl;
 
 import static org.apache.sling.systemreadiness.core.Status.State.GREEN;
 import static org.apache.sling.systemreadiness.core.Status.State.RED;
+import static org.apache.sling.systemreadiness.core.Status.State.YELLOW;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +36,7 @@ import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
 import org.apache.sling.systemreadiness.core.SystemReady;
 import org.apache.sling.systemreadiness.core.SystemStatus;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -82,6 +82,9 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
     
     private AtomicReference<SystemStatus> systemState;
 
+    private static final CheckStatus frameworkStartingStatus = new CheckStatus("implicit check",
+            new Status(YELLOW, "Framework is starting"));
+
 
     @Activate
     public void activate(BundleContext context, final Config config) {
@@ -115,12 +118,17 @@ public class SystemReadinessMonitorImpl implements SystemReadinessMonitor {
 
     private void check() {
         Status.State prevState = systemState.get().getState();
-        List<CheckStatus> statuses = evaluateAllChecks();
+        List<CheckStatus> statuses = (isFrameworkStartingAndCheckMissing()) ? Arrays.asList(frameworkStartingStatus) : evaluateAllChecks();
         Status.State currState = State.worstOf(statuses.stream().map(status -> status.getStatus().getState()));
         this.systemState.set(new SystemStatus(currState, statuses));
         if (currState != prevState) {
             manageMarkerService(currState);
         }
+    }
+
+    private boolean isFrameworkStartingAndCheckMissing() {
+        return (checks.stream().noneMatch(c -> c.getClass().equals(FrameworkStartCheck.class)))
+                && (context.getBundle(0).getState() != Bundle.ACTIVE);
     }
 
     private List<CheckStatus> evaluateAllChecks() {
