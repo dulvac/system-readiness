@@ -19,6 +19,7 @@
 package org.apache.sling.systemreadiness.core.impl.servlet;
 
 import java.io.PrintWriter;
+import java.util.stream.Collectors;
 
 import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemStatus;
@@ -35,19 +36,20 @@ public class StatusWriterJson {
         writer.println("{");
         writer.println(String.format("  \"systemStatus\": \"%s\", ", systemState.getState().name()));
         writer.println("  \"checks\": [");
-        for (CheckStatus checkStatus : systemState.getCheckStates()) {
-            write(checkStatus);
-        }
+        String states = systemState.getCheckStates().stream()
+                .map(this:: getStatus)
+                .collect(Collectors.joining(",\n"));
+        writer.println(states);
         writer.println("  ]");
         writer.println("}");
     }
 
-    private void write(CheckStatus status) {
-        writer.println(String.format(
-                "    { \"check\": \"%s\", \"status\": \"%s\", \"details\": \"%s\" }, ", 
+    private String getStatus(CheckStatus status) {
+        return String.format(
+                "    { \"check\": \"%s\", \"status\": \"%s\", \"details\": \"%s\" }", 
                 status.getCheckName(),
                 status.getStatus().getState().name(), 
-                status.getStatus().getDetails()));
+                status.getStatus().getDetails());
     }
 
 }
