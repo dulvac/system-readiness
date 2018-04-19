@@ -38,12 +38,13 @@ import org.slf4j.LoggerFactory;
 
 @Component(
         name = "FrameworkStartCheck",
-        configurationPolicy = ConfigurationPolicy.REQUIRE
+        configurationPolicy = ConfigurationPolicy.OPTIONAL
 )
 @Designate(ocd=FrameworkStartCheck.Config.class)
 public class FrameworkStartCheck implements SystemReadinessCheck {
 
     public static final String FRAMEWORK_STARTED = "Framework started";
+    public static final String FRAMEWORK_START_CHECK_NAME = "Framework Start Check";
 
     @ObjectClassDefinition(
             name="OSGi Installer System Readiness Check",
@@ -83,7 +84,7 @@ public class FrameworkStartCheck implements SystemReadinessCheck {
 
     @Override
     public String getName() {
-        return "Framework Start Check";
+        return FRAMEWORK_START_CHECK_NAME;
     }
 
     @Override

@@ -28,12 +28,20 @@ import javax.inject.Inject;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+
 
 public class BaseTest {
     @Inject
     public BundleContext context;
+
+    @Inject
+    public ServiceComponentRuntime scr;
+
 
     public Option baseConfiguration() {
         return CoreOptions.composite(
@@ -53,6 +61,7 @@ public class BaseTest {
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.scr").version("2.0.14"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").version("1.8.16"),
                 bundle("reference:file:target/classes/")
+
         );
     }
     
@@ -85,6 +94,34 @@ public class BaseTest {
         return newConfiguration("SystemReadinessServlet")
                 .put("osgi.http.whiteboard.servlet.pattern", path)
                 .asOption();
+    }
+
+    public ComponentDescriptionDTO getComponentDesc(String compName) {
+        return getComponentDesc(desc -> desc.name.equals(compName), compName);
+    }
+
+    public ComponentDescriptionDTO getComponentDesc(Class<?> compClass) {
+        return getComponentDesc(desc -> desc.implementationClass.equals(compClass.getName()), compClass.getName());
+    }
+
+    public ComponentDescriptionDTO getComponentDesc(Predicate<ComponentDescriptionDTO> predicate, String label) {
+        Optional<ComponentDescriptionDTO> result = scr.getComponentDescriptionDTOs().stream()
+                .filter(predicate)
+                .findFirst();
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            throw new RuntimeException("Component " + label + " not found");
+        }
+    }
+
+    public void disableComponent(String name) {
+        ComponentDescriptionDTO desc = getComponentDesc(name);
+        scr.disableComponent(desc);
+    }
+
+    public void disableFrameworkStartCheck() {
+        disableComponent("FrameworkStartCheck");
     }
 
 }

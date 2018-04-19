@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import org.apache.sling.systemreadiness.core.CheckStatus;
 import org.apache.sling.systemreadiness.core.SystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.SystemReadinessMonitor;
+import org.apache.sling.systemreadiness.core.impl.FrameworkStartCheck;
 import org.apache.sling.systemreadiness.core.osgi.examples.TestSystemReadinessCheck;
 import org.apache.sling.systemreadiness.core.osgi.util.BaseTest;
 import org.awaitility.Awaitility;
@@ -45,7 +46,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 
 @RunWith(PaxExam.class)
 public class SystemReadinessMonitorTest extends BaseTest {
-
 
     @Inject
     SystemReadinessMonitor monitor;
@@ -62,6 +62,8 @@ public class SystemReadinessMonitorTest extends BaseTest {
 
     @Test
     public void test() throws InterruptedException {
+        disableFrameworkStartCheck();
+
         Awaitility.setDefaultPollDelay(0, TimeUnit.MILLISECONDS);
         assertNumChecks(0);
         wait.until(monitor::isReady, is(true));
@@ -79,7 +81,8 @@ public class SystemReadinessMonitorTest extends BaseTest {
         check.exception();
         wait.until(monitor::isReady, is(false));
         assertNumChecks(1);
-        final CheckStatus status = monitor.getStatus().getCheckStates().iterator().next();
+
+        CheckStatus status = monitor.getStatus().getCheckStates().iterator().next();
         assertThat(status.getCheckName(), is(check.getClass().getName()));
         assertThat(status.getStatus().getState(), is(RED));
         assertThat(status.getStatus().getDetails(), containsString("Failure"));

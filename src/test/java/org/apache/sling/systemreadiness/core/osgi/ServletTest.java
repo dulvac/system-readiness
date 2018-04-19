@@ -64,12 +64,15 @@ public class ServletTest extends BaseTest {
 
     @Test
     public void test() throws IOException, InterruptedException {
+        disableFrameworkStartCheck();
+
         Awaitility.pollInSameThread();
         Awaitility.await().until(monitor::isReady, is(false));
         String content = Awaitility.await().until(() -> readFromUrl(getUrl(SERVLET_PATH), 503), notNullValue());
         System.out.println(content);
         assertThat(content, containsString("\"systemStatus\": \"YELLOW\""));
         context.registerService(Runnable.class, () -> {}, null);
+        System.out.println(content);
         Awaitility.await().until(monitor::isReady, is(true));
         String content2 = Awaitility.await().until(() -> readFromUrl(getUrl(SERVLET_PATH), 200), notNullValue());
         assertThat(content2, containsString("\"systemStatus\": \"GREEN\""));

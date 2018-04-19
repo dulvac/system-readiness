@@ -128,15 +128,4 @@ public class DSRootCauseTest extends BaseTest {
         dsRootCause.getRootCause(desc);
     }
 
-    private ComponentDescriptionDTO getComponentDesc(Class<?> compClass) {
-        Optional<ComponentDescriptionDTO> result = scr.getComponentDescriptionDTOs().stream()
-                .filter(desc -> desc.implementationClass.equals(compClass.getName()))
-                .findFirst();
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            throw new RuntimeException("Component " + compClass.getName() +" not found");
-        }
-    }
-
 }
